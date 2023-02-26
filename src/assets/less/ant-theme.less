@@ -1,0 +1,53 @@
+.ant-form .ant-form-item {
+  @inputBgc: transparent;
+  @inputHeight: 47px;
+  @minInputHeight: 30px;
+  @textareaHeight: 170px;
+  .default-input {
+    box-shadow: none;
+    width: 100%;
+    border-radius: none;
+    background-color: @inputBgc;
+    height: @inputHeight;
+    min-height: @minInputHeight;
+    line-height: @inputHeight;
+  }
+  .default-input {
+    background-color: @inputBgc;
+    .ant-input, .ant-select-selector {
+      background-color: @inputBgc;
+    }
+    .ant-input:-webkit-autofill {
+      box-shadow: 0 0 0 1000px @inputBgc inset;
+    }
+    .ant-input:hover, input:focus {
+      box-shadow: 0 0 0 1000px @inputBgc inset;
+    }
+    .ant-select-selector {
+      border: none;
+    }
+    .ant-select-selector, .ant-select-selection-search-input, .ant-select-selection-placeholder, .ant-select-selection-item {
+      line-height: @inputHeight;
+      min-height: @minInputHeight;
+      height: @inputHeight;
+    }
+  }
+  .default-input.ant-input-textarea {
+    height: @textareaHeight;
+    overflow: hidden;
+    textarea {
+      border: none;
+    }
+  }
+  // .default-input.ant-select .ant-select-selector, .default-input, .default-input input, .default-input .ant-input {
+  //   border: none;
+  //   box-shadow: none;
+  //   width: 100%;
+  //   background-color: @inputBgc;
+  //   height: 48px;
+  //   line-height: 48px;
+  // }
+  // .default-input .ant-input-prefix {
+  //   background-color: #e8e9ed;
+  // }
+}

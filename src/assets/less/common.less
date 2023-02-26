@@ -1,0 +1,111 @@
+p {
+  margin: 0;
+}
+
+/* 生成fs12-fs32，对应字体大小, @mul是倍数 */
+.fs (@i: 12, @mul: 1) when (@i <= 32) {
+  .fs@{i} {
+    font-size: (@i * @mul) + 0px;
+  }
+  .fs(@i + 1, @mul)
+}
+.fs(12, 1);
+
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+.text-link {
+  color: @lightBlue;
+  cursor: pointer;
+}
+.text-red {
+  color: @red;
+}
+
+.pos-abs {
+  position: absolute;
+}
+.pos-rel {
+  position: relative;
+}
+
+.full {
+  width: 100%;
+  height: 100%;
+}
+.over-hidden {
+  overflow: hidden;
+}
+.over-scroll {
+  overflow: scroll;
+}
+
+.bold {
+  font-weight: bold;
+}
+.block {
+  width: 100%;
+}
+.pointer {
+  cursor: pointer;
+}
+
+.flex {
+  display: flex;
+  &-wrap {
+    flex-wrap: wrap;
+  }
+  &-1 {
+    flex: 1;
+  }
+  &-between {
+    justify-content: space-between;
+  }
+  &-center {
+    justify-content: center;
+  }
+  &-align {
+    align-items: center;
+  }
+  &-around {
+    justify-content: space-around;
+  }
+  &-column {
+    flex-direction: column;
+  }
+  &-wrap {
+    flex-wrap: wrap;
+  }
+}
+
+.btn {
+  height: 46px;
+  &-blue {
+    background-color: @blue;
+    border-color: @blue;
+    &:hover, &:focus {
+      background-color: @lightBlue;
+      border-color: @lightBlue;
+    }
+  }
+}
+
+.bg-blue {
+  background-color: @blue;
+  &-bottom {
+    background-image: linear-gradient(to bottom, @blue, transparent);
+  }
+  &-left {
+    background-image: linear-gradient(to left, @blue, transparent);
+  }
+  &-right {
+    background-image: linear-gradient(to right, @blue, transparent);
+  }
+  &-transparent {
+    background-image:radial-gradient(@blue, transparent)
+  }
+}
