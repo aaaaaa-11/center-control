@@ -1,7 +1,7 @@
 import Storage from 'vue-ls'
 
 const options = {
-  namespace: 'cc-demo__',
+  namespace: 'cc_demo__',
   name: 'ls',
   storage: 'local'
 }

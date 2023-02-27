@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-// import ls from '@/localStore';
+import ls from '@/localStore';
 
 type User = {
   userId?: number;
@@ -29,7 +29,7 @@ export const useUserStore = defineStore('user', () => {
 
   const clearUserInfo = () => {
     console.log('清空userinfo');
-    // ls.remove('token')
+    ls.remove('token')
     window.localStorage.removeItem('cc-demo__token')
     userInfo.value = {}
     permission.value = {}

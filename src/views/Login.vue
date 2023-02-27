@@ -101,7 +101,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { message } from 'ant-design-vue'
 import config from '@/config'
 import { useRoute, useRouter } from 'vue-router'
-// import ls from '@/localStore'
+import ls from '@/localStore'
 
 const $router = useRouter()
 const $route = useRoute()
@@ -114,8 +114,8 @@ const handleLoginRes = (res:any) => {
   if (code === 0) {
     let page = $route.query?.from
     const { permission, user_name, user_id, role_id, role_name, token } = data
-    window.localStorage.setItem('cc-demo__token', token)
-    // ls.set('token', token, 60 * 60 * 24 * 1000)
+    // window.localStorage.setItem('cc-demo__token', token)
+    ls.set('token', token, 60 * 60 * 24 * 1000)
     try {
       const parsePermission = JSON.parse(permission)
       console.log('解析权限', parsePermission);
@@ -211,7 +211,7 @@ const accountFormRules = {
       trigger: 'change'
     },
     {
-      message: '用户名为1～20个字符，由数字和字母组成，不区分大小写',
+      message: '用户名为1〜20个字符，由数字和字母组成，不区分大小写',
       pattern: nameReg,
       trigger: 'change'
     }
@@ -223,7 +223,7 @@ const accountFormRules = {
       trigger: 'change'
     },
     {
-      message: '密码长度6～20，由数字和字母组成，不区分大小写',
+      message: '密码长度6〜20，由数字和字母组成，不区分大小写',
       pattern: pwReg,
       trigger: 'change'
     },
@@ -302,7 +302,7 @@ const forgetPw = () => {
 .login-page {
   &-bg {
     color: #9b999911;
-    font-size: 440px;
+    font-size: 30vw;
     transform: rotate(-10deg);
     font-style: italic;
   }
@@ -315,8 +315,11 @@ const forgetPw = () => {
     border: 1px solid #ccc;
     color: #333;
     border-radius: 8px;
-    width: 400px;
-    height: 500px;
+    width: 30%;
+    max-width: 400px;
+    min-height: 450px;
+    height: 50%;
+    max-height: 500px;
     right: 12%;
     bottom: 12%;
     &__title {

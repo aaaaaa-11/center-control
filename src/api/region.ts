@@ -6,20 +6,9 @@ type RegionListParams = {
 }
 // 获取区域列表
 export const getRegionList = (params: RegionListParams) => {
-  // return axios.post('/region/query_region_list', {})
-  return Promise.resolve({
-    data: {
-      code: 0,
-      msg: 'success',
-      data: {
-        total: 50,
-        list: new Array(50).map((i, index) => ({
-          id: index + 1,
-          name: '区域' + index + 1,
-          parentId: Math.floor(Math.random() * 50)
-        }))
-      }
-    }
+  const { pageNum, pageSize, name = '' } = params
+  return axios.get('/region/query_region_list', {
+    params: { pageNum, pageSize }
   })
 }
 // new Array(5).fill(null).map((i, index) => {
