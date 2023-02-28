@@ -19,13 +19,26 @@ export const getDeviceList = (params: DeviceListParams) => {
       code: 0,
       msg: 'success',
       data: {
-        total: 10,
-        list: new Array(10).fill(null).map((d, index) => ({
-          id: index + rId + new Date().getTime(),
-          regionId: rId,
-          regionName: '区域' + rId,
-          name: rId + '监控' + index,
-        }))
+        total: 1,
+        list: [
+          {
+            id: 1,
+            regionId: rId,
+            lng: 144.94141840985228,
+            lat: -37.79901200377621,
+            alt: 63.53831949260134,
+            regionName: '区域1',
+            name: '监控1'
+          }
+        ]
+        // list: new Array(1).fill(null).map((d, index) => ({
+        //   id: index + rId + new Date().getTime(),
+        //   regionId: rId,
+        //   "lng": 144.94697 + index * 0.5,
+        //   "lat": -37.819 + index * 0.5,
+        //   regionName: '区域' + rId,
+        //   name: rId + '监控' + index,
+        // }))
       }
     }
   })

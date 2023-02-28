@@ -39,15 +39,17 @@
       border: none;
     }
   }
-  // .default-input.ant-select .ant-select-selector, .default-input, .default-input input, .default-input .ant-input {
-  //   border: none;
-  //   box-shadow: none;
-  //   width: 100%;
-  //   background-color: @inputBgc;
-  //   height: 48px;
-  //   line-height: 48px;
-  // }
-  // .default-input .ant-input-prefix {
-  //   background-color: #e8e9ed;
-  // }
+}
+
+.ant-btn {
+  &-warn {
+    background-color: @yellow;
+    border-color: @yellow;
+    color: #fff;
+    &:hover, &:focus {
+      background-color: #e4bd67;
+      color: #fff;
+      border-color: #e4bd67;
+    }
+  }
 }

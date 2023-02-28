@@ -2,17 +2,23 @@
   <div class="main-page">
     <section class="bg-blue-right main-page-side main-page-left">
       <a-tree
+        class="device-tree"
         v-model:expandedKeys="expandedKeys"
         v-model:selectedKeys="selectedKeys"
         v-model:checkedKeys="checkedKeys"
         checkable
-        :tree-data="deviceList"
+        @check="checkItems"
+        :tree-data="treeData"
       >
         <template #title="{ title, key }">
           <span v-if="key === '0-0-1-0'" style="color: #1890ff">{{ title }}</span>
           <template v-else>{{ title }}</template>
         </template>
       </a-tree>
+      <MapTools
+        @changeViewer="changeViewer"
+        @flyTo="flyTo"
+      @createArrowWall="createArrowWall"/>
     </section>
     <section class="bg-blue-left main-page-side main-page-right">
       hhh
@@ -24,45 +30,80 @@
 import { useMainStore, type RegionItem } from '@/stores/useMainStore';
 import { computed } from '@vue/reactivity';
 import { ref, watch } from 'vue'
+import MapTools from './MapTools.vue'
+import type { CesiumPos } from '@/hooks/cesium/useCesiumMap'
+
 const mainStore = useMainStore()
 
-const expandedKeys = <string[]>([])
+const expandedKeys = ref<string[]>([])
 const selectedKeys = ref<string[]>([])
 const checkedKeys = ref<string[]>([])
 
+
 const regionList = computed(() => mainStore.regionList)
 
-const deviceList = ref([])
+const emit = defineEmits(['changeViewer', 'flyTo', 'createArrowWall', 'changeMarkerVisible'])
+const checkItems = () => {
+  deviceList.forEach((d:any) => {
+    d.visible = checkedKeys.value.includes(d.id) ? true : false
+  })
+  emit('changeMarkerVisible', deviceList)
+}
 
-// 这里回头重新写
-// 在home里获取所有区域，（以后如果账号绑了区域，再过滤当前账号下的区域）
-// 在这里区域数组转树型结构，区域作为树的外层，
-// 然后区域数组遍历，获取每个区域下的设备，挂到树上
 
-// const getDeviceList = () => {
-//   console.log(regionList.value);
-// }
-// watch(regionList, val => {
-//   const params = {
-//     pageNum: 1,
-//     pageSize: 999
-//   }
-//   const treeData = []
-//   const regions:Array<RegionItem> = treeToArr(val)
-//   regions.forEach(region => {
-//     const item = {
-//       level: 0,
-//       title: region.name,
-//       key: region.id,
-//       children: []
-//     }
-//     mainStore.getDevices(params).then(res => {
-  
-//     })
-//   })
-// }, {
-//   immediate: true
-// })
+const treeData:any = ref([])
+let deviceList:any = []
+
+const changeViewer = (view: CesiumPos) => emit('changeViewer', view)
+const flyTo = (view: CesiumPos) => emit('flyTo', view)
+type WallOption = {
+  points: Array<CesiumPos>,
+  visible: boolean
+}
+const createArrowWall = (options:WallOption) => emit('createArrowWall', options)
+
+watch(regionList, list => {
+  const listVal = JSON.parse(JSON.stringify(list))
+  type DeviceData = { total:number, list: Array<any>}
+  expandedKeys.value = []
+
+  let tree:any = []
+  let map:any = {}
+  listVal.forEach((region:RegionItem) => {
+    map[region.id] = region
+    region.children = []
+  })
+  listVal.forEach((region:RegionItem) => {
+    mainStore.getDevices({
+      pageNum: 1,
+      pageSize: 999,
+      regionId: region.id,
+    }).then(data => {
+      const list = (data as DeviceData).list
+      deviceList.push(...list)
+      list.map(l => {
+        l.key = l.id,
+        l.title = l.name,
+        l.isDevice = true
+      })
+      region.children = list
+      const parent = map[region.parentId]
+      if (parent) {
+        parent.children.push(region)
+      } else {
+        tree.push({
+          ...region,
+          key: 'region-' + region.id,
+          title: region.name
+        })
+        expandedKeys.value.push(String(region.id))
+      }
+      treeData.value = [...tree]
+    })
+  })
+}, {
+  immediate: true
+})
 
 </script>
 
@@ -70,14 +111,20 @@ const deviceList = ref([])
 .main-page {
   width: 100%;
   &-side {
-    top: 10px;
+    top: 0px;
     bottom: 10px;
     width: 340px;
     position: absolute;
     z-index: 10;
   }
   &-left {
+    padding: 20px;
     left: 10px;
+    .ant-tree {
+      height: calc(100% - 150px);
+      background-color: transparent;
+      color: #fff;
+    }
   }
   &-right {
     right: 10px;

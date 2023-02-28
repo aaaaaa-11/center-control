@@ -1,23 +1,34 @@
 import config from '@/config'
+import type { WallOptions } from './useArrowWall'
+import useArrowWall from './useArrowWall'
 import useCesium from './useCesium'
 import useCesiumTiles from './useCesiumTiles'
+import CesiumEntify from './userCesiumEntity'
+import type { EntityOptions } from './userCesiumEntity'
+import markerIcon from '@/assets/icon/position.png'
+
 const Cesium = useCesium()
 const { createCesium3DTileset } = useCesiumTiles()
+const { createWall, changeVisible } = useArrowWall()
 
-type CesiumPos = {
+export type CesiumPos = {
   lng: number;
   lat: number;
   alt?: number;
   pitch?: number,
-  heading?: number
+  heading?: number,
+  duration?: number,
+  stay?: number
 }
 type WaterItem = {
   data: Array<CesiumPos>,
   alt?: number
 }
 type WaterDataType = Array<WaterItem>
+let markerInstances:any = {}
 export default function useCesiumMap () {
   let viewer:any = null
+  // 初始化cesium地图
   const initCesiumMap = (container: string, configOptions?: any) => {
     const baseConfig = {
       animation: false, // 创建动画小部件
@@ -74,7 +85,8 @@ export default function useCesiumMap () {
     return viewer
   }
 
-  const setViewer = ({ lng, lat, alt = 500, pitch = 0, heading = 0 }: CesiumPos) => {
+  // 切换视角
+  const setCesiumViewer = ({ lng, lat, alt = 500, pitch = 0, heading = 0 }: CesiumPos) => {
       const pitchInRadians = Cesium.Math.toRadians(pitch - 90)
       const headingInRadians = Cesium.Math.toRadians(heading)
       viewer.camera.setView({
@@ -87,6 +99,7 @@ export default function useCesiumMap () {
       })
   }
 
+  // 初始化水面
   const initWater = (tileset:any, waterData: WaterDataType) => {
     waterData.forEach(water => {
       const data = water.data.map(i => ({
@@ -102,11 +115,12 @@ export default function useCesiumMap () {
     })
   }
 
+  // 加载3d模型，目前先用cesium上提供的一个模型
   const create3Dtileset = (water: boolean, waterData: WaterDataType = []) => {
     const tileset = createCesium3DTileset(viewer)
     tileset.readyPromise.then(() => {
       water && initWater(tileset, waterData)
-      config.cameraTo ? setViewer(config.cameraTo) : viewer.zoomTo(tileset)
+      config.cameraTo ? setCesiumViewer(config.cameraTo) : viewer.zoomTo(tileset)
       // Apply the default style if it exists
       const extras = tileset.asset.extras;
       if (
@@ -119,9 +133,83 @@ export default function useCesiumMap () {
     })
   }
 
+  // 获取摄像机视角
+  const getCameraPos = () => {
+    console.log('getCameraPos');
+    const cartographic = viewer.camera.positionCartographic
+    const lat = Cesium.Math.toDegrees(cartographic.latitude)
+    const lng = Cesium.Math.toDegrees(cartographic.longitude)
+    const alt = cartographic.height
+    const pitch = Cesium.Math.toDegrees(viewer.camera.pitch) + 90
+    const heading = Cesium.Math.toDegrees(viewer.camera.heading)
+    return { lng, lat, alt, pitch, heading }
+  }
+
+  // 视角移动
+  const cesiumFlyTo = (pos:CesiumPos) => {
+    const { lng, lat, alt = 500, pitch = 0, heading = 0, duration = 3, stay = 1 } = pos
+    const pitchInRadians = Cesium.Math.toRadians(pitch - 90)
+    const headingInRadians = Cesium.Math.toRadians(heading)
+    return new Promise((resolve, reject) => {
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(+lng, +lat, +alt),
+        orientation: {
+          heading: headingInRadians,
+          pitch: pitchInRadians,
+          roll: 0.0
+        },
+        duration: duration,
+        easingFunction: Cesium.EasingFunction.LINEAR_NONE,
+        complete: () => {
+          setTimeout(() => {
+            resolve(1)
+          }, stay * 1000)
+        }
+      })
+    })
+  }
+  // 创建箭头路线
+  const createCesiumArrowWall = (options:WallOptions) => {
+    return createWall(viewer, options)
+  }
+
+  // 创建实体/改变实体显示隐藏
+  const changeCesiumMarkers = (markers: Array<any>) => {
+    markers.forEach(m => {
+      if (!m.lng || !m.lat) return
+      console.log('changeCesiumMarkers---', m.visible, markerInstances[m.id]);
+      if (markerInstances[m.id]) {
+        console.log(m.visible);
+        markerInstances[m.id].changeMarkerVisible(m.visible);
+      } else if (m.visible) {
+        markerInstances[m.id] = new CesiumEntify({
+          icon: markerIcon,
+          size: [40, 40],
+          position: {
+            lng: m.lng,
+            lat: m.lat,
+            alt: m.alt || 500
+          }
+        }, viewer)
+      }
+    })
+  }
+  const removeCesiumMarkers = () => {
+    Object.keys(markerInstances).forEach((m:any) => {
+      markerInstances[m].removeMarker(viewer)
+      markerInstances[m] = undefined
+    })
+  }
   return {
     initCesiumMap,
     viewer,
-    create3Dtileset
+    cesiumFlyTo,
+    changeWallVisible: changeVisible,
+    setCesiumViewer,
+    getCameraPos,
+    create3Dtileset,
+    createCesiumArrowWall,
+    changeCesiumMarkers,
+    removeCesiumMarkers,
   }
 }

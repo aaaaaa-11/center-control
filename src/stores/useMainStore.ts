@@ -16,9 +16,9 @@ export type NavItem = {
 export type NavListType = Array<NavItem>
 
 export type RegionItem = {
-  name: string,
   id: number,
-  parentId: number | null
+  parentId: number,
+  [prosName: string]: any
 }
 export type RegionListType = Array<RegionItem>
 
@@ -27,10 +27,18 @@ export type DeviceItem = {
   name: string,
   regionId: number,
   regionName: string,
+  lng?: number,
+  lat?: number,
+  alt?: number
 }
 export type DeviceListType = Array<DeviceItem>
 
 const navData: NavListType = JSON.parse(JSON.stringify(config.navList))
+navData.map(n => {
+  if (n.children) {
+    n.showChildren = false
+  }
+})
 export const useMainStore = defineStore('main', () => {
   const { permission } = useUserStore()
 
@@ -81,7 +89,7 @@ export const useMainStore = defineStore('main', () => {
       getDeviceList(params).then(res => {
         const { code, msg, data } = res.data
         if (code === 0) {
-          resolve(data.list)
+          resolve(data)
         }else {
           reject(new Error(msg))
         }

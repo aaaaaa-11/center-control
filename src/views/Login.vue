@@ -1,7 +1,7 @@
 <template>
   <div class="pos-rel full over-hidden login-page">
     <p class="text-center fs32 login-page-title">{{ title }}</p>
-    <div class="login-page-bg pos-abs">背景</div>
+    <div class="login-page-bg pos-abs full">背景</div>
     <div class="pos-abs login-page-panel">
       <p class="fs20 login-page-panel__title">注册登录</p>
       <div class="login-page-panel__body">
@@ -88,37 +88,41 @@
         </div>
       </div>
     </div>
+    <Vcode :show="showVerifylider" @success="sendVCode" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { queryUserInfo, sendVerifycode, userLogin } from '@/api/userCenter'
 import { phoneReg, vcodeReg, nameReg, pwReg } from '@/utils/Regexp'
 import { formatPw } from '@/utils/format'
-import { computed } from '@vue/reactivity'
 import { useUserStore } from '@/stores/useUserStore'
 import { message } from 'ant-design-vue'
-import config from '@/config'
 import { useRoute, useRouter } from 'vue-router'
+import config from '@/config'
 import ls from '@/localStore'
+import Vcode from "vue3-puzzle-vcode";
 
 const $router = useRouter()
 const $route = useRoute()
 const title = config.title
 
+
 const userStore = useUserStore()
 
-const handleLoginRes = (res:any) => {
+// 处理返回的用户信息，returnToken表示需要返回token（登录接口）
+const handleLoginRes = (res:any, returnToken:boolean = false) => {
   const { code, data, msg } = res.data
   if (code === 0) {
     let page = $route.query?.from
     const { permission, user_name, user_id, role_id, role_name, token } = data
-    // window.localStorage.setItem('cc-demo__token', token)
-    ls.set('token', token, 60 * 60 * 24 * 1000)
+    if (returnToken && !token) {
+      return
+    }
+    returnToken && ls.set('token', token, 60 * 60 * 24 * 1000)
     try {
       const parsePermission = JSON.parse(permission)
-      console.log('解析权限', parsePermission);
       userStore.permission = parsePermission
       if (!page || page && !parsePermission[page as string]) {
         page = Object.keys(parsePermission).find(key => parsePermission[key]) || null
@@ -126,7 +130,6 @@ const handleLoginRes = (res:any) => {
       if (!page) {
         return message.error('暂无页面权限')
       }
-      console.log('page', page);
       $router.push({
         name: page as string
       })
@@ -151,8 +154,8 @@ const checkAuth = () => {
   queryUserInfo().then(res => {
     handleLoginRes(res)
   }).catch(err => {
+    console.log('checkAuth获取用户信息失败', err);
     userStore.clearUserInfo()
-    console.log('获取用户信息失败', err);
   })
 }
 checkAuth()
@@ -170,9 +173,9 @@ const policyChecked = ref<boolean>(true)
 const second = ref<number>(60)
 const beforeGetCode = ref<boolean>(true)
 const formState = reactive({
-  username: '',
-  password: '',
-  phone: '',
+  username: 'user01',
+  password: '123hhh',
+  phone: '13300000000',
   code: ''
 })
 
@@ -233,17 +236,23 @@ const accountFormRules = {
 const validatePhone = computed(() => phoneReg.test(formState.phone))
 
 const uuid = ref<string>('')
+const showVerifylider = ref(false)
 // 获取验证码
 const getCode = () => {
   if (!validatePhone.value) {
     return message.error('请输入正确的手机号')
   }
+  showVerifylider.value = true
+}
+// 发送验证码
+const sendVCode = () => {
+  showVerifylider.value = false
   sendVerifycode({
     phone: formState.phone
   }).then(res => {
-    console.log(res);
-    const { code, data: { verify_code, uuid: u }, msg } = res.data
+    const { code, data, msg } = res.data
     if (code === 0) {
+      const { verify_code, uuid: u } = data
       console.log('验证码：', verify_code, '3分钟内有效')
       uuid.value = u
       clearInterval(timer)
@@ -273,17 +282,18 @@ const submit = () => {
   if (formType.value === FormTypes.PHONE && !uuid.value) {
     return message.error('请发送验证码！')
   }
+  if (!policyChecked.value) {
+    return
+  }
   formRef.value.validate().then(() => {
-    console.log('check success')
     const params = formType.value === FormTypes.PHONE
       ? { phone: formState.phone, uuid: uuid.value, verify_code: formState.code }
       : { username: formState.username, password: formatPw(formState.password) }
     userLogin(params).then(res => {
-      console.log(res)
-      handleLoginRes(res)
+      handleLoginRes(res, true)
     }).catch(e => {
-      userStore.clearUserInfo()
       console.log('登录失败', e);
+      userStore.clearUserInfo()
       message.error(e?.message)
     })
   }).catch((e:Error) => {
@@ -300,11 +310,16 @@ const forgetPw = () => {
 
 <style lang="less">
 .login-page {
+  filter: blur(0.5);
   &-bg {
-    color: #9b999911;
-    font-size: 30vw;
-    transform: rotate(-10deg);
-    font-style: italic;
+    background-image: url(/src/assets/bg.png);
+    filter: blur(0.5);
+    /* width: 100%; */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    opacity: 0.1;
+    top: 0;
+    left: 0;
   }
   &-title {
     padding-top: 20px;

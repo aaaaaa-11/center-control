@@ -109,3 +109,30 @@ p {
     background-image:radial-gradient(@blue, transparent)
   }
 }
+
+.bg-page {
+  background-color: @bgcBlue;
+  &-show {
+    z-index: 20;
+  }
+}
+
+.blue-border {
+  border: @blueBorder;
+}
+.blue-btn {
+  .pointer;
+  border: 1px solid @blue;
+  border-radius: 8px;
+  &--active {
+    background-color: #29b7cb;
+  }
+  &:hover {
+    background-color: #23d6d06e;
+    transition: all 0.5s ease;
+  }
+}
+
+.blue-box {
+  background-color: @boxBgc;
+}

@@ -45,7 +45,7 @@ const logout = () => {
   left: 0;
   width: 100%;
   height: @headerH;
-  z-index: 1;
+  z-index: 100;
   @lineH: @headerH * 0.5;
   .title {
     height: @lineH;

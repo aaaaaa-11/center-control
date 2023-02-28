@@ -28,9 +28,9 @@ export const useUserStore = defineStore('user', () => {
   const permission = ref<Permission>({})
 
   const clearUserInfo = () => {
-    console.log('清空userinfo');
+    console.log('清空userinfo', ls.get('token'));
     ls.remove('token')
-    window.localStorage.removeItem('cc-demo__token')
+    // window.localStorage.removeItem('cc-demo__token')
     userInfo.value = {}
     permission.value = {}
   }

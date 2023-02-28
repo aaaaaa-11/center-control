@@ -1,14 +1,22 @@
 <template>
   <div class="flex block page-menu">
-    <div :class="`text-center pointer fs16 page-menu-item ${activePage ? 'menut-item--active' : ''}`"
+    <div
+      :class="`
+        text-center pos-rel fs16
+        page-menu-item
+        blue-btn
+        ${activePage === m.routeName || m.children?.find(c => c.routeName === activePage) ? 'blue-btn--active' : ''}`"
       :key="m.auth"
       v-for="m in menuList"
+      @mouseenter="showChildren(m)"
+      @mouseleave="hideChildren(m)"
       @click="goPage(m)">
-      <span
-        @mouseenter="showChildren(m)"
-        @mouseleave="hideChildren(m)">{{ m.name }}</span>
-      <div v-if="m.children && m.showChildren">
-        <p v-for="c in m.children" @click="goPage(c)">{{ c.name }}</p>
+      <span>{{ m.name }}</span>
+      <div v-show="m.children && m.showChildren" class="pos-abs sub-menu">
+        <p v-for="c in m.children"
+          :key="c.name"
+          :class="`sub-menu-item ${activePage === c.routeName ? 'sub-menu-item--active' : ''}`"
+          @click="goPage(c)">{{ c.name }}</p>
       </div>
     </div>
     <!-- <a-menu v-model:selectedKeys="activePage" mode="horizontal">
@@ -28,16 +36,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
-import { useMainStore, type NavItem } from '@/stores/useMainStore'
+import { useMainStore, type NavItem, type NavListType, } from '@/stores/useMainStore'
 const mainStore = useMainStore()
 const $route = useRoute()
 const $router = useRouter()
 
 const activePage = computed(() => $route.name)
-const menuList = computed(() => mainStore.manuList)
+const navData = computed(() => mainStore.manuList)
+const menuList = ref<NavListType>(navData.value)
 
+watch(navData, (val) => {
+  menuList.value = val
+})
+
+// const showChildren = (item:NavItem) => {
+//   const menuList_ = [...menuList.value]
+//   const menu = menuList_.find(i => i.name === item.name)
+//   if (menu) {
+//     menu.showChildren = true
+//     menuList.value = menuList_
+//   }
+// }
 const showChildren = (item:NavItem) => item.showChildren = true
 const hideChildren = (item:NavItem) => item.showChildren = false
 
@@ -57,12 +78,27 @@ const goPage = (item:NavItem) => {
   &-item {
     padding: 0 35px;
     letter-spacing: 6px;
-    border: 1px solid @blue;
-    border-radius: 8px;
     line-height: 38px;
-    &:hover {
-      background-color: #5d655f6e;
-      transition: all 0.5s ease;
+    &:not(:last-of-type) {
+      margin-right: 20px;
+    }
+    .sub-menu {
+      width: 100%;
+      left: 0;
+      top: 100%;
+      background-color: #10aec280;
+      z-index: 100;
+      &-item {
+        &:not(:last-of-type) {
+          border-bottom: 1px solid #10aec2;
+        }
+        &:hover {
+          background-color: #10aec2a0;
+        }
+        &--active {
+          background-color: #10aec2e0;
+        }
+      }
     }
   }
 }

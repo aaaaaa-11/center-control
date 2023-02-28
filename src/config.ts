@@ -7,7 +7,8 @@ const hostname = dev ? publicHostname : currentHostname
 export default {
   title: '总控演示系统',
   baseURL: `http://${hostname}:16789/center-control`,
-  cameraTo: null, // { lng, lat, ...}
+  cameraTo: {lng: 144.94385694652598, lat: -37.86303316113539, alt: 3206.1195804532713, pitch: 61.30164496795608, heading: 360},
+  overlookPos: {lng: 144.95719947366646, lat: -37.80623914866371, alt: 6764.24215745795, pitch: 0, heading: 359.99999999999994},
   waterColor: '#122F32',
   navList: [ // 页面菜单，后期做一下菜单管理，从后台获取
     {
