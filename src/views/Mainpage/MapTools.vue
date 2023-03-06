@@ -11,11 +11,12 @@
 <script setup lang="ts">
 import config from '@/config';
 import { reactive } from 'vue'
-import roamData from '@/views/Mainpage/roamData.json'
-import busData from '@/views/Mainpage/busData.json'
-import type { CesiumPos } from '@/hooks/cesium/useCesiumMap';
+import roamData from './roamData.json'
+import busData from './busData.json'
+import type { CesiumPos } from '@/hooks/cesium/useCesium';
+import { useMapStore } from '@/stores/useMapStore';
+const { mapAction } = useMapStore()
 
-const emit = defineEmits(['changeViewer', 'flyTo', 'createArrowWall'])
 // 工具/操作种类
 const enum TOOLHOOKS {
   OVERLOOK = 'o',
@@ -27,7 +28,7 @@ type ToolItem = {
   value: TOOLHOOKS,
   active: boolean,
 }
-const tools = reactive<Array<ToolItem>>([
+const tools = reactive<ToolItem[]>([
   {
     label: '俯瞰图',
     value: TOOLHOOKS.OVERLOOK,
@@ -47,17 +48,17 @@ const tools = reactive<Array<ToolItem>>([
 
 // 俯瞰视角切换
 const overlookAction = (active:boolean) => {
-  const views = active ? config.overlookPos : config.cameraTo
-  emit('changeViewer', views)
+  const pos = active ? config.overlookPos : config.cameraTo
+  mapAction('setPos', pos)
 }
 
 // 定时切换视角（漫游ing）
 let roamTimer:any = 0
 let duration = 4000
-const roaming = (data:Array<CesiumPos>) => {
+const roaming = (data: CesiumPos[]) => {
   roamTimer = setTimeout(() => {
     if (data.length) {
-      emit('flyTo', data.pop())
+      mapAction('flyTo', data.pop())
       roaming(data)
     } else {
       tools[1].active = false
@@ -72,12 +73,12 @@ const roamingAction = (active:boolean) => {
     return
   }
   const data = JSON.parse(JSON.stringify(roamData))
-  emit('flyTo', data.pop())
+  mapAction('flyTo', data.pop())
   roaming(data)
 }
 // 切换公交路线展示
 const showBusRoutes = (visible: boolean) => {
-  emit('createArrowWall', { points: busData, visible })
+  mapAction('changeWallVisible', { points: busData, visible })
 }
 
 const toolsAction = {

@@ -1,35 +1,31 @@
 import config from '@/config'
-import type { WallOptions } from './useArrowWall'
-import useArrowWall from './useArrowWall'
-import useCesium from './useCesium'
-import useCesiumTiles from './useCesiumTiles'
-import CesiumEntify from './userCesiumEntity'
-import type { EntityOptions } from './userCesiumEntity'
+import type { Entity, Viewer } from 'cesium'
+import useCesium, { type CesiumPos } from './useCesium'
+import useArrowWall, { type WallOptions } from './useArrowWall'
+import useCesiumTiles, { type WaterItem } from './useCesiumTiles'
+import useCesiumMarker from './useCesiumMarker'
 import markerIcon from '@/assets/icon/position.png'
 
 const Cesium = useCesium()
-const { createCesium3DTileset } = useCesiumTiles()
-const { createWall, changeVisible } = useArrowWall()
+const { createCesium3DTileset, initWater } = useCesiumTiles()
+const { createMarker } = useCesiumMarker()
+const { createWall, changeWallVisible } = useArrowWall()
 
-export type CesiumPos = {
-  lng: number;
-  lat: number;
+export interface CesiumMarker {
+  id: number;
+  lng?: number;
+  lat?: number;
   alt?: number;
-  pitch?: number,
-  heading?: number,
-  duration?: number,
-  stay?: number
+  visible?: boolean;
+  icon?: string;
 }
-type WaterItem = {
-  data: Array<CesiumPos>,
-  alt?: number
-}
-type WaterDataType = Array<WaterItem>
+
 let markerInstances:any = {}
+let wallMaker: any
 export default function useCesiumMap () {
-  let viewer:any = null
+  let viewer: Viewer
   // 初始化cesium地图
-  const initCesiumMap = (container: string, configOptions?: any) => {
+  const initCesiumMap = (container: string, configOptions?: Viewer.ConstructorOptions) => {
     const baseConfig = {
       animation: false, // 创建动画小部件
       baseLayerPicker: false, // 基础图层选项
@@ -70,7 +66,7 @@ export default function useCesiumMap () {
       // dataSources // 	小部件可视化的数据源集合。如果提供此参数，则假定该实例为调用者所有，并且不会在销毁查看器时被销毁
       // shadows: true, // 确定阴影是否由光源投射
       // terrainShadows: true // 	确定地形是否投射或接收来自光源的阴影
-      mapMode2D: true, // 	确定 2D 地图是否可旋转或可以在水平方向上无限滚动
+      // mapMode2D: true, // 	确定 2D 地图是否可旋转或可以在水平方向上无限滚动
       // projectionPicker: false, // 如果设置为 true，将创建 ProjectionPicker 小部件
       // blurActiveElementOnCanvasFocus: true,
       // requestRenderMode: true,
@@ -82,60 +78,32 @@ export default function useCesiumMap () {
       ...baseConfig,
       ...configOptions
     })
-    return viewer
   }
 
   // 切换视角
-  const setCesiumViewer = ({ lng, lat, alt = 500, pitch = 0, heading = 0 }: CesiumPos) => {
-      const pitchInRadians = Cesium.Math.toRadians(pitch - 90)
-      const headingInRadians = Cesium.Math.toRadians(heading)
-      viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(+lng, +lat, +alt),
-        orientation: {
-          heading: headingInRadians,
-          pitch: pitchInRadians,
-          roll: 0.0
-        }
-      })
-  }
-
-  // 初始化水面
-  const initWater = (tileset:any, waterData: WaterDataType) => {
-    waterData.forEach(water => {
-      const data = water.data.map(i => ({
-        ...i,
-        alt: water.alt
-      }))
-      tileset.addWater({
-        points: data,
-        color: config.waterColor,
-        wave: 2,
-        frequency: 100
-      })
+  const setCesiumViewer = ({ lng, lat, alt = 0, pitch = 0, heading = 0 }: CesiumPos) => {
+    const pitchInRadians = Cesium.Math.toRadians(pitch - 90)
+    const headingInRadians = Cesium.Math.toRadians(heading)
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(+lng, +lat, +alt),
+      orientation: {
+        heading: headingInRadians,
+        pitch: pitchInRadians,
+        roll: 0.0
+      }
     })
   }
 
-  // 加载3d模型，目前先用cesium上提供的一个模型
-  const create3Dtileset = (water: boolean, waterData: WaterDataType = []) => {
-    const tileset = createCesium3DTileset(viewer)
-    tileset.readyPromise.then(() => {
-      water && initWater(tileset, waterData)
-      config.cameraTo ? setCesiumViewer(config.cameraTo) : viewer.zoomTo(tileset)
-      // Apply the default style if it exists
-      const extras = tileset.asset.extras;
-      if (
-        Cesium.defined(extras) &&
-        Cesium.defined(extras.ion) &&
-        Cesium.defined(extras.ion.defaultStyle)
-      ) {
-        tileset.style = new Cesium.Cesium3DTileStyle(extras.ion.defaultStyle);
-      }
+  // 创建3d模型[，初始化水面，切换视角]
+  const create3Dtileset = (waterData?: WaterItem[], color: string = config.waterColor) => {
+    createCesium3DTileset(viewer).then(() => {
+      waterData?.length && initWater(waterData, color)
+      config.cameraTo && setCesiumViewer(config.cameraTo)
     })
   }
 
   // 获取摄像机视角
   const getCameraPos = () => {
-    console.log('getCameraPos');
     const cartographic = viewer.camera.positionCartographic
     const lat = Cesium.Math.toDegrees(cartographic.latitude)
     const lng = Cesium.Math.toDegrees(cartographic.longitude)
@@ -169,47 +137,63 @@ export default function useCesiumMap () {
     })
   }
   // 创建箭头路线
-  const createCesiumArrowWall = (options:WallOptions) => {
-    return createWall(viewer, options)
+  const changeCesiumWallVisible = (options:WallOptions) => {
+    console.log(options, wallMaker);
+    if (!wallMaker) {
+      wallMaker = createWall(options)
+      viewer.entities.add(wallMaker)
+    } else {
+      changeWallVisible(options.visible, wallMaker)
+    }
   }
 
   // 创建实体/改变实体显示隐藏
-  const changeCesiumMarkers = (markers: Array<any>) => {
+  const changeCesiumMarkers = (markers: CesiumMarker[]) => {
     markers.forEach(m => {
       if (!m.lng || !m.lat) return
-      console.log('changeCesiumMarkers---', m.visible, markerInstances[m.id]);
       if (markerInstances[m.id]) {
-        console.log(m.visible);
         markerInstances[m.id].changeMarkerVisible(m.visible);
       } else if (m.visible) {
-        markerInstances[m.id] = new CesiumEntify({
-          icon: markerIcon,
+        const marker = createMarker({
+          icon: m.icon || markerIcon,
           size: [40, 40],
           position: {
             lng: m.lng,
             lat: m.lat,
-            alt: m.alt || 500
+            alt: m.alt || 50
           }
-        }, viewer)
+        })
+        markerInstances[m.id] = marker
+        viewer.entities.add(marker)
       }
     })
   }
+  // 移除markerInstances
   const removeCesiumMarkers = () => {
     Object.keys(markerInstances).forEach((m:any) => {
-      markerInstances[m].removeMarker(viewer)
+      removeCesiumEntity(markerInstances[m])
       markerInstances[m] = undefined
     })
   }
+  // 移除cesium上的指定实体
+  const removeCesiumEntity = (entity: Entity) => {
+    viewer.entities.remove(entity)
+  }
+  // 移除地图上所有实体
+  const removeAllEntities = (entities: Entity[] = []) => {
+    entities.map(entity => removeCesiumEntity(entity))
+    removeCesiumMarkers()
+  }
   return {
     initCesiumMap,
-    viewer,
     cesiumFlyTo,
-    changeWallVisible: changeVisible,
     setCesiumViewer,
     getCameraPos,
     create3Dtileset,
-    createCesiumArrowWall,
+    changeCesiumWallVisible,
     changeCesiumMarkers,
     removeCesiumMarkers,
+    removeCesiumEntity,
+    removeAllEntities,
   }
 }

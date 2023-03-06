@@ -1,22 +1,23 @@
-import useCesium from './useCesium'
-import type { CesiumPos } from './useCesiumMap'
+import type { Entity, Viewer } from 'cesium'
+import useCesium, { type CesiumPos } from './useCesium'
 const Cesium = useCesium()
 
 export type WallOptions = {
   clampToGround?: boolean,
   depthTest?: boolean,
   color?: string,
-  points?: Array<CesiumPos>,
+  points?: CesiumPos[],
   width?: number,
+  visible: boolean,
 }
+
 export default function useCesiumArrowWall () {
-  let marker:any  = null
-  const createWall = (viewer:any, wallOptions: WallOptions) => {
+  const createWall = (wallOptions: WallOptions) => {
     const { clampToGround = false, depthTest = false, color = '#fbb929', points = [], width = 30 } = wallOptions
     const arr = points.reduce((prev:any, cur) => {
       return [...prev, cur.lng, cur.lat, cur.alt]
     }, [])
-    marker = new Cesium.Entity({
+    let marker = new Cesium.Entity({
       polyline: {
         clampToGround, // 是否贴地
         depthFailMaterial: depthTest ? undefined : Cesium.Color.fromCssColorString(color), // 被遮挡时的材质，相当于关闭depth test
@@ -26,18 +27,17 @@ export default function useCesiumArrowWall () {
         material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.fromCssColorString(color))
       }
     })
-    viewer.entities.add(marker)
+    return marker
   }
 
-  const changeVisible = (bool:boolean) => {
+  const changeWallVisible = (bool:boolean, marker: Entity) => {
     if (marker) {
       marker.show = bool
     }
   }
 
   return {
-    marker,
     createWall,
-    changeVisible
+    changeWallVisible,
   }
 }

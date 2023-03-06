@@ -7,48 +7,22 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted } from 'vue'
 import { useMapStore } from '@/stores/useMapStore'
-import type { CesiumPos } from '@/hooks/cesium/useCesiumMap';
-const { initMap, getPos, setViewer, flyToPos, createWall, changeWallVisible, changeMarkers, removeMarkers } = useMapStore()
+const { mapAction } = useMapStore()
 
 let mapId = 'pageMap'
-let wall: any = null
-
-const changeViewer = (pos:CesiumPos) => {
-  setViewer(pos)
-}
-const flyTo = (pos:CesiumPos) => {
-  flyToPos(pos)
-}
-type WallOption = {
-  points: Array<CesiumPos>,
-  visible: boolean
-}
-const createArrowWall = (options:WallOption) => {
-  const { points, visible } = options
-  if (!wall && visible) {
-    wall = createWall({ points })
-  } else {
-    changeWallVisible(visible)
-  }
-}
 
 onMounted(() => {
-  initMap(mapId)
+  mapAction('initMap', mapId)
+  mapAction('create3Dtileset')
 
   document.addEventListener('keyup', (e) => {
     if (e.key === 'g') {
-      console.log(getPos());
+      console.log(mapAction('getViewer'));
     }
   })
 })
 onBeforeUnmount(() => {
-  removeMarkers()
-})
-defineExpose({
-  changeViewer,
-  flyTo,
-  createArrowWall,
-  changeMarkerVisible: changeMarkers
+  mapAction('removeAll')
 })
 </script>
 

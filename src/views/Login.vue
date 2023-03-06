@@ -1,7 +1,7 @@
 <template>
   <div class="pos-rel full over-hidden login-page">
     <p class="text-center fs32 login-page-title">{{ title }}</p>
-    <div class="login-page-bg pos-abs full">背景</div>
+    <div class="login-page-bg pos-abs full"></div>
     <div class="pos-abs login-page-panel">
       <p class="fs20 login-page-panel__title">注册登录</p>
       <div class="login-page-panel__body">
@@ -54,20 +54,7 @@
                 :visibilityToggle="false"
                 placeholder="请输入密码"
                 v-model:value="formState.password">
-                <!-- <template #prefix>
-                  <img @click="pwType = ''" src="@/assets/login/password_b.png" alt="" class="icon">
-                </template> -->
               </a-input-password>
-              <!-- <a-input
-                v-else
-                style="max-width: 60%;"
-                class="default-input"
-                placeholder="请输入密码"
-                v-model:value="formState.password">
-                <template #prefix>
-                  <img @click="pwType = 'pw'" src="@/assets/login/password_b_again.png" alt="" class="icon">
-                </template>
-              </a-input> -->
               <span class="text-link get-code" @click="forgetPw">忘记密码</span>
             </div>
           </a-form-item>
@@ -300,10 +287,8 @@ const submit = () => {
     console.log(e)
   })
 }
+// 忘记密码
 const forgetPw = () => {
-  // this.$router.push({
-  //   name: 'password'
-  // })
   message.warning('请与管理员联系')
 }
 </script>
