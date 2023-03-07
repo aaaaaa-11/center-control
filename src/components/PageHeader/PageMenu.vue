@@ -38,14 +38,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
-import { useMainStore, type NavItem, type NavListType, } from '@/stores/useMainStore'
-const mainStore = useMainStore()
+import { useNavStore, type NavItem, } from '@/stores/useNavStore'
+const navStore = useNavStore()
 const $route = useRoute()
 const $router = useRouter()
 
 const activePage = computed(() => $route.name)
-const navData = computed(() => mainStore.manuList)
-const menuList = ref<NavListType>(navData.value)
+const navData = computed(() => navStore.manuList)
+const menuList = ref<NavItem[]>(navData.value)
 
 watch(navData, (val) => {
   menuList.value = val

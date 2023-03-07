@@ -1,14 +1,15 @@
 import axios from './index'
-type RegionListParams = {
+type DeviceListParams = {
   pageNum: number,
   pageSize: number,
+  regionId?: number,
   name?: string // 区域名称，模糊查询
 }
 // 获取区域列表
-export const queryRegionList = (params: RegionListParams) => {
-  const { pageNum, pageSize, name = '' } = params
+export const querDeviceList = (params: DeviceListParams) => {
+  const { pageNum, pageSize, name = '', regionId } = params
   return axios.get('/region/query_region_list', {
-    params: { pageNum, pageSize, name }
+    params: { pageNum, pageSize, name, regionId }
   })
 }
 // new Array(5).fill(null).map((i, index) => {
