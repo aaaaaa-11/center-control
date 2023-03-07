@@ -1,18 +1,21 @@
-export type ArrItemType = {
+export type ArrItem = {
   id: number,
   parentId: number,
+  key: number,
+  title: string,
+  children?: ArrItem[],
   [prosName: string]: any,
-  children?: Array<ArrItemType>
 }
-export type ArrayType = Array<ArrItemType>
 
-export const arrToTree = (arr: ArrayType) => {
+export const arrToTree = (arr: ArrItem[]) => {
   type ObjMapType = {
-    [id: number]: ArrItemType
+    [id: number]: ArrItem
   }
-  const tree:ArrayType = []
+  const tree:ArrItem[] = []
   const map:ObjMapType = {}
   arr.forEach(i => {
+    i.title = i.name
+    i.key = i.id
     map[i.id] = i
   })
   arr.map(i => {

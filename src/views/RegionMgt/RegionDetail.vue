@@ -1,0 +1,14 @@
+<template>
+  <section class="blue-border region-detail">
+    
+  </section>
+</template>
+
+<script setup lang="ts">
+import {} from 'vue'
+
+</script>
+
+<style>
+
+</style>

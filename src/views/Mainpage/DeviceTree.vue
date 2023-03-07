@@ -18,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import { useMainStore } from '@/stores/useMainStore';
+import { useDeviceStore } from '@/stores/useDeviceStore';
 import { ref, watch } from 'vue'
 
-const mainStore = useMainStore()
+const deviceStore = useDeviceStore()
 
 const expandedKeys = ref<string[]>([])
 const selectedKeys = ref<string[]>([])
