@@ -17,7 +17,7 @@ export type NavListType = Array<NavItem>
 
 export type RegionItem = {
   id: number,
-  parentId: number,
+  parent_id: number,
   [prosName: string]: any
 }
 export type RegionListType = Array<RegionItem>

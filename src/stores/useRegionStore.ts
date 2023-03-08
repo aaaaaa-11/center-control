@@ -1,10 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { queryRegionList } from '@/api/region'
+import { queryRegionList, createRegion, updateRegion, deleteRegion } from '@/api/region'
 
 export interface RegionItem {
   id: number,
-  parentId: number,
+  parent_id: number,
+  name: string,
   [prosName: string]: any
 }
 
@@ -14,6 +15,11 @@ type PageParams = {
 }
 const regionList = ref<RegionItem[]>([])
 
+export enum ActionTypes {
+  c = 'create',
+  u = 'update',
+  d = 'delete'
+}
 export const useRegionStore = defineStore('region', () => {
 
   // 根据分页等条件获取区域
@@ -33,6 +39,7 @@ export const useRegionStore = defineStore('region', () => {
       })
     })
   }
+  // 获取所有区域
   const getAllRegions = () => {
     return new Promise((resolve, reject) => {
       regionList.value = []
@@ -48,9 +55,31 @@ export const useRegionStore = defineStore('region', () => {
     })
   }
 
+  // 操作区域
+  const actions = {
+    [ActionTypes.c]: createRegion,
+    [ActionTypes.u]: updateRegion,
+    [ActionTypes.d]: deleteRegion,
+  }
+  const regionAction = (type: ActionTypes, params: any) => {
+    return new Promise((resolve, reject) => {
+      actions[type](params).then(res => {
+        const { code, data, msg } = res.data
+        if (code === 0) {
+          resolve(data)
+        } else {
+          reject(new Error(msg))
+        }
+      }).catch(e => {
+        reject(e)
+      })
+    })
+  }
+
   return {
     regionList,
     getRegionList,
     getAllRegions,
+    regionAction
   }
 })

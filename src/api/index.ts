@@ -36,7 +36,7 @@ export const toLoginPage = () => {
 // 响应拦截器
 axios.interceptors.response.use(response => {
   const code = response.data.rescode
-  if (code && code - 0 !== 200) {
+  if (code && code - 0 !== 0) {
     switch (code - 0) {
       case 401:
         // message.error('登录过期')

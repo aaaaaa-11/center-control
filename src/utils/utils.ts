@@ -1,6 +1,6 @@
 export type ArrItem = {
   id: number,
-  parentId: number,
+  parent_id: number,
   key: number,
   title: string,
   children?: ArrItem[],
@@ -19,7 +19,7 @@ export const arrToTree = (arr: ArrItem[]) => {
     map[i.id] = i
   })
   arr.map(i => {
-    const parent = map[i.parentId]
+    const parent = map[i.parent_id]
     if (parent) {
       (parent.children || (parent.children = [])).push(i)
     } else {

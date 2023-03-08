@@ -2,29 +2,38 @@ import axios from './index'
 type DeviceListParams = {
   pageNum: number,
   pageSize: number,
-  regionId?: number,
-  name?: string // 区域名称，模糊查询
+  region_id?: number,
+  name?: string // 设备名称，模糊查询
 }
-// 获取区域列表
-export const querDeviceList = (params: DeviceListParams) => {
-  const { pageNum, pageSize, name = '', regionId } = params
-  return axios.get('/region/query_region_list', {
-    params: { pageNum, pageSize, name, regionId }
+// 获取设备列表
+export const queryDeviceList = (params: DeviceListParams) => {
+  const { pageNum, pageSize, name = '', region_id } = params
+  return axios.get('/device/query_device_list', {
+    params: { pageNum, pageSize, name, region_id }
   })
 }
-// new Array(5).fill(null).map((i, index) => {
-//   return {
-//     name: '区域' + index,
-//     id: index,
-//     children: new Array(Math.random() * 10).fill(null).map((i, innerIndex) => ({
-//       name: '区域' + index + '_' + innerIndex,
-//       id: index + innerIndex + 100
-//     }))
-//   }
-// })
-// 增加区域
-// 删除区域
-// 修改区域
+// 增加设备
+type DeviceItem = {
+  region_id: number,
+  name: string,
+  id?: number
+}
+export const createDevice = (params: DeviceItem) => {
+  const { region_id, name } = params
+  return axios.post('/device/create_device', { region_id, name })
+}
+// 修改设备
+export const updateDevice = (params: DeviceItem) => {
+  const { region_id, name, id } = params
+  return axios.post('/device/update_device', { region_id, name, id })
+}
+// 删除设备
+export const deleteDevice = (id: number) => {
+  return axios.post('/device/delete_device', { id })
+}
+
+
+
 
 
 

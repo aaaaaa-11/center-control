@@ -4,128 +4,187 @@
       <a-button type="primary" @click="addRegion()">
         <template #icon><PlusOutlined /></template>
         添加</a-button>
-      <a-button type="danger" @click="deleteRegion()">
+      <a-button type="danger" @click="deleteRegions()">
         <template #icon><DeleteOutlined /></template>
         批量删除</a-button>
     </a-space>
     <a-tree
-      class="blue-border region-tree"
+      class="blue-border blue-tree region-tree"
       v-model:expandedKeys="expandedKeys"
       v-model:selectedKeys="selectedKeys"
       v-model:checkedKeys="checkedKeys"
       draggable
+      checkable
       :tree-data="regionTree"
       @dragenter="onDragEnter"
       @drop="onDrop"
     >
-    <template #title="{ title, key }">
+    <template #title="{ title, key, editable, data }">
       <p class="title-line flex">
-        {{ title }}
-        <i  @click="addRegion()" title="添加下级区域"><PlusOutlined /></i>
-        <i  @click="editRegion()" title="修改当前区域"><EditOutlined /></i>
-        <i  @click="deleteRegion()" title="删除当前区域及其下级区域"><DeleteOutlined /></i>
+        <span v-show="!editable">{{ title }}</span>
+        <a-input v-if="editable" v-model:value="data.title" @change="changeVal">{{ title }}</a-input>
+        <i v-show="editable" @click="cancleEdit(data)" title="取消修改"><CloseOutlined /></i>
+        <i v-show="editable" @click="confirmEdit(data)" title="确认修改"><CheckOutlined /></i>
+        <i v-show="!editable" @click="addRegion(data)" title="添加下级区域"><PlusOutlined /></i>
+        <i v-show="!editable" @click="updateRegion(data)" title="修改当前区域"><EditOutlined /></i>
+        <i v-show="!editable" @click="deleteRegion(key)" title="删除当前区域及其下级区域"><DeleteOutlined /></i>
       </p>
     </template>
   </a-tree>
+  <!-- <RegionDialog ref="regionDialog" /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import {PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import {PlusOutlined, EditOutlined, DeleteOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons-vue'
+// import RegionDialog from './RegionDialog.vue'
 import type {
   AntTreeNodeDragEnterEvent,
   AntTreeNodeDropEvent,
   TreeProps,
+  TreeDataItem
 } from 'ant-design-vue/es/tree';
-import { useRegionStore, type RegionItem } from '@/stores/useRegionStore';
+import { useRegionStore, type RegionItem, ActionTypes } from '@/stores/useRegionStore';
 import { ref } from 'vue';
 import { arrToTree } from '@/utils/utils';
+import { message } from 'ant-design-vue';
 const regionStore = useRegionStore()
 
-const expandedKeys = <string[]>([])
-const selectedKeys = ref<string[]>([])
-const checkedKeys = ref<string[]>([])
+const expandedKeys = ref<number[]>([])
+const selectedKeys = ref<number[]>([])
+const checkedKeys = ref<number[]>([])
 
+interface RegionTreeItem extends RegionItem {
+  title: string;
+  key: number;
+  name: string;
+  editable?: boolean,
+  children?: RegionTreeItem[]
+}
 
-const regionTree = ref<RegionItem[]>([])
+const regionTree = ref<RegionTreeItem[]>([])
+const getData = () => {
+  regionStore.getAllRegions().then(() => {
+    regionTree.value = arrToTree(regionStore.regionList.map(i => ({
+      ...i,
+      title: i.name,
+      key: i.id
+    }))) as RegionTreeItem[]
+    console.log(regionTree.value);
+  })
+}
+getData()
 
-
-regionStore.getAllRegions().then(res => {
-  regionTree.value = arrToTree(regionStore.regionList)
-  console.log(regionTree.value);
-})
-
+const changeVal = () => {
+  regionTree.value = [...regionTree.value]
+}
 // type TreeDataItem = TreeProps['treeData'][number];
 const onDragEnter = (info: AntTreeNodeDragEnterEvent) => {
   console.log(info);
   // expandedKeys 需要展开时
-  // expandedKeys.value = info.expandedKeys;
+  expandedKeys.value = info.expandedKeys as number[];
 };
 
 const onDrop = (info: AntTreeNodeDropEvent) => {
-  console.log(info);
-  // const dropKey = info.node.key;
-  // const dragKey = info.dragNode.key;
-  // const dropPos = info.node.pos.split('-');
-  // const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-  // const loop = (data: TreeProps['treeData'], key: string | number, callback: any) => {
-  //   data.forEach((item, index) => {
-  //     if (item.key === key) {
-  //       return callback(item, index, data);
-  //     }
-  //     if (item.children) {
-  //       return loop(item.children, key, callback);
-  //     }
-  //   });
-  // };
-  // const data = [...gData.value];
-
-  // // Find dragObject
-  // let dragObj: TreeDataItem;
-  // loop(data, dragKey, (item: TreeDataItem, index: number, arr: TreeProps['treeData']) => {
-  //   arr.splice(index, 1);
-  //   dragObj = item;
-  // });
-  // if (!info.dropToGap) {
-  //   // Drop on the content
-  //   loop(data, dropKey, (item: TreeDataItem) => {
-  //     item.children = item.children || [];
-  //     /// where to insert 示例添加到头部，可以是随意位置
-  //     item.children.unshift(dragObj);
-  //   });
-  // } else if (
-  //   (info.node.children || []).length > 0 && // Has children
-  //   info.node.expanded && // Is expanded
-  //   dropPosition === 1 // On the bottom gap
-  // ) {
-  //   loop(data, dropKey, (item: TreeDataItem) => {
-  //     item.children = item.children || [];
-  //     // where to insert 示例添加到头部，可以是随意位置
-  //     item.children.unshift(dragObj);
-  //   });
-  // } else {
-  //   let ar: TreeProps['treeData'] = [];
-  //   let i = 0;
-  //   loop(data, dropKey, (_item: TreeDataItem, index: number, arr: TreeProps['treeData']) => {
-  //     ar = arr;
-  //     i = index;
-  //   });
-  //   if (dropPosition === -1) {
-  //     ar.splice(i, 0, dragObj);
-  //   } else {
-  //     ar.splice(i + 1, 0, dragObj);
-  //   }
-  // }
-  // gData.value = data;
+  if (info.dragNode.key > 0) {
+    const dropKey = info.node.key as number; // 要放的位置
+    const dragKey = info.dragNode.key as number; // 拖动的项
+    const dropToGap:boolean = info.dropToGap || false; // true当兄弟，false当儿子
+    let parent_id = 0
+    if (dropToGap) {
+      parent_id = info.node.dataRef?.parent_id
+    } else {
+      parent_id = dropKey
+    }
+    console.log(info.dragNode)
+    regionStore.regionAction(ActionTypes.u, {
+      title: info.dragNode.name,
+      parent_id,
+      id: dragKey
+    }).then(() => {
+      getData()
+    }).catch(e => {
+      console.log('err');
+      message.error(e.message)
+    })
+  }
 };
-const addRegion = () => {
-  console.log('add');
+// const regionDialog = ref()
+type Parent = {
+  [key in keyof RegionTreeItem]?: RegionTreeItem[key]
 }
-const editRegion = () => {
-  console.log('edit');
+let parentItem:Parent = {} // 上一次增加项的父级，可用来取消修改
+let updateItem:object = {} // 上一次更新的项，可用来取消修改
+const cancleEdit = (data?: RegionTreeItem) => {
+  if (!data) {
+    // 还原上一次修改未保存的项
+    (updateItem as RegionTreeItem).editable = false
+    if (parentItem.children) {
+      // 去掉增加未保存的项
+      parentItem.children = parentItem.children.filter(i => i.key > 0)
+    }
+  } else { // 还原本次修改未保存的项
+    data.editable = false
+    data.title = data.name
+  }
+  updateItem = {}
+  regionTree.value = [...regionTree.value.filter(i => i.key > 0)]
 }
-const deleteRegion = () => {
-  console.log('delete');
+const confirmEdit = (data: RegionTreeItem) => {
+  const action = data.key > 0 ? ActionTypes.u : ActionTypes.c
+  regionStore.regionAction(action, data).then(() => {
+    getData()
+  }).catch(e => {
+    console.log('err');
+    message.error(e.message || e)
+  })
+}
+const addRegion = (data?: RegionTreeItem) => {
+  cancleEdit()
+  // 创建新的项，id为负数，以示区分
+  const id = -1 * new Date().getTime()
+  const item = {
+    id,
+    key: id,
+    title: '',
+    name: '',
+    checkable: false,
+    parent_id: data ? data.key : 0,
+    editable: true
+  }
+  // 插入当前项下一级或是根下面
+  if (data) {
+    parentItem = data
+    if (!data.children) {
+      data.children = []
+    }
+    data.children.push(item)
+    expandedKeys.value.push(data.key)
+    regionTree.value = [...regionTree.value]
+  } else {
+    parentItem = {
+      children: regionTree.value
+    }
+    regionTree.value.push(item)
+  }
+}
+const updateRegion = (data: RegionTreeItem) => {
+  cancleEdit()
+  data.editable = true
+  // regionDialog.value?.open(data, 'edit')
+}
+const deleteRegion = (id: number) => {
+  return message.success('敬请期待~')
+  regionStore.regionAction(ActionTypes.d, {
+    id
+  })
+}
+const deleteRegions = () => {
+  if (checkedKeys.value.length) {
+    return message.success('敬请期待~')
+  } else {
+    return message.error('请先勾选删除项')
+  }
 }
 </script>
 
@@ -134,25 +193,8 @@ const deleteRegion = () => {
   width: 100%;
   padding: 20px;
   .region-tree {
-    background-color: @boxBgc;
     width: 100%;
     height: calc(100% - 40px);
-    overflow: auto;
-    padding: 20px 0px;
-    .ant-tree-node-content-wrapper {
-      &:hover {
-        background-color: #28b5c9;
-      }
-      &.ant-tree-node-selected {
-        background-color: #1dc3d9;
-      }
-    }
-    .title-line {
-      color: #fff;
-      i {
-        margin-left: 10px;
-      }
-    }
   }
   .region-detail {
     background-color: @boxBgc;

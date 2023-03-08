@@ -11,19 +11,25 @@ export const queryRegionList = (params: RegionListParams) => {
     params: { pageNum, pageSize, name }
   })
 }
-// new Array(5).fill(null).map((i, index) => {
-//   return {
-//     name: '区域' + index,
-//     id: index,
-//     children: new Array(Math.random() * 10).fill(null).map((i, innerIndex) => ({
-//       name: '区域' + index + '_' + innerIndex,
-//       id: index + innerIndex + 100
-//     }))
-//   }
-// })
 // 增加区域
-// 删除区域
+type RegionItem = {
+  parent_id: number,
+  title: string,
+  id?: number
+}
+export const createRegion = (params: RegionItem) => {
+  const { parent_id, title } = params
+  return axios.post('/region/create_region', { parent_id, name: title })
+}
 // 修改区域
+export const updateRegion = (params: RegionItem) => {
+  const { parent_id, title, id } = params
+  return axios.post('/region/update_region', { parent_id, name: title, id })
+}
+// 删除区域
+export const deleteRegion = (id: number) => {
+  return axios.post('/region/delete_region', { id })
+}
 
 
 
