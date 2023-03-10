@@ -14,8 +14,6 @@ export const arrToTree = (arr: ArrItem[]) => {
   const tree:ArrItem[] = []
   const map:ObjMapType = {}
   arr.forEach(i => {
-    i.title = i.name
-    i.key = i.id
     map[i.id] = i
   })
   arr.map(i => {

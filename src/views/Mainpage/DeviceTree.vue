@@ -18,65 +18,108 @@
 </template>
 
 <script setup lang="ts">
-import { useRegionStore } from '@/stores/useRegionStore';
-import { useDeviceStore } from '@/stores/useDeviceStore';
-import { ref, watch, computed } from 'vue'
-import { arrToTree } from '@/utils/utils';
+import { useRegionStore, type RegionItem } from '@/stores/useRegionStore';
+import { useDeviceStore, type DeviceItem } from '@/stores/useDeviceStore';
+import { useMapStore } from '@/stores/useMapStore';
+import { ref, watch, computed, nextTick } from 'vue'
+import { arrToTree, type ArrItem } from '@/utils/utils';
 
+const mapStore = useMapStore()
 const deviceStore = useDeviceStore()
 const regionStore = useRegionStore()
 const regionList = computed(() => regionStore.regionList)
 
-const expandedKeys = ref<string[]>([])
-const selectedKeys = ref<string[]>([])
-const checkedKeys = ref<string[]>([])
+const expandedKeys = ref<number[]>([])
+const selectedKeys = ref<number[]>([])
+const checkedKeys = ref<number[]>([])
 
-const treeData = ref<any[]>([])
-const checkItems = () => {}
-const loading = ref(false)
-watch(regionList, (val) => {
-  loading.value = true
-  const regionTree = arrToTree(val.map(i => ({
-    ...i,
-    key: i.id,
-    title: i.name
-  })))
-  treeData.value = regionTree
-  const actions:any = []
-  val.forEach(item => {
-    actions.push(deviceStore.getDeviceList({
-      pageNum: 1,
-      pageSize: 999,
-      region_id: item.id
-    }).then(res => {
-      if (!item.children) {
-        item.children = []
-      }
-      const list = res.list.map(i => {
-        i.key = i.id
-        i.title = i.name
-        i.isDevice = true
-        return i
-      })
-      item.children.push(...list)
-      console.log(item);
-    }).catch(e => {
-      console.log(e);
-    }))
+
+type TreeItem = RegionItem | DeviceItem | ArrItem
+
+const treeData = ref<TreeItem[]>([])
+let deviceList:DeviceItem[] = []
+
+// 切换markers显示、隐藏
+const checkItems = (keys:number[]) => {
+  console.log(keys)
+  const showMarkers:TreeItem[] = []
+  const hideMarkers:TreeItem[] = []
+  deviceList.forEach((item) => {
+    if (keys.includes(item.id)) {
+      showMarkers.push(item)
+    } else {
+      hideMarkers.push(item)
+    }
   })
-  Promise.all(actions).then(res => {
-    treeData.value = [...treeData.value]
+  console.log(showMarkers.map(i => i.id), hideMarkers.map(i => i.id));
+}
+const loading = ref(false)
+
+
+// 将设备挂到区域下
+const addDevice = (tree:TreeItem[]) => {
+  let actions:any = []
+  tree.forEach(item => {
+    if (item.children) {
+      actions.push(...addDevice(item.children))
+    } else {
+      actions.push(deviceStore.getDeviceList({
+        pageNum: 1,
+        pageSize: 999,
+        region_id: item.id
+      }).then(res => {
+        if (!item.children) {
+          item.children = []
+        }
+        deviceList = res.list
+        const list = deviceList.map(i => ({
+          ...i,
+          key: i.id,
+          title: i.name,
+          isDevice: true,
+          parent_id: i.region_id
+        }))
+        item.children.push(...list)
+      }).catch(e => {
+        console.log(e);
+      }))
+    }
+  })
+  return actions
+}
+
+// 获取区域树下所有设备
+const getData = () => {
+  const val = regionList.value
+  loading.value = true
+  // 这里将region的key取负数，和区域key区分开
+  const data = val.map(i => {
+    const item = {
+      ...i,
+      key: -1 * i.id,
+      title: i.name
+    }
+    expandedKeys.value.push(item.key)
+    return item
+  })
+  const regionTree = arrToTree(data)
+  treeData.value = regionTree
+  Promise.all(addDevice(regionTree)).then(res => {
+    nextTick(() => {
+      console.log(treeData.value);
+      treeData.value = [...treeData.value]
+    })
     loading.value = false
   }).catch(() => {
     loading.value = false
   })
+}
+// 区域更改后，重新获取设备
+watch(regionList, (val) => {
+  getData()
 }, {
   immediate: true
 })
-
-const getData = () => {
-  
-}
 </script>
 
 <style lang="less">

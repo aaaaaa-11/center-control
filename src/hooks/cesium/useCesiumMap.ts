@@ -20,8 +20,9 @@ export interface CesiumMarker {
   icon?: string;
 }
 
-let markerInstances:any = {}
-let wallMaker: any
+let markerInstances:any = {} // 设备点位
+let wallMarker: any // 路线
+let preCreateMarker: any // 设备管理里面创建的点位
 export default function useCesiumMap () {
   let viewer: Viewer
   // 初始化cesium地图
@@ -138,19 +139,19 @@ export default function useCesiumMap () {
   }
   // 创建箭头路线
   const changeCesiumWallVisible = (options:WallOptions) => {
-    console.log(options, wallMaker);
-    if (!wallMaker) {
-      wallMaker = createWall(options)
-      viewer.entities.add(wallMaker)
+    console.log(options, wallMarker);
+    if (!wallMarker) {
+      wallMarker = createWall(options)
+      viewer.entities.add(wallMarker)
     } else {
-      changeWallVisible(options.visible, wallMaker)
+      changeWallVisible(options.visible, wallMarker)
     }
   }
 
   // 创建实体/改变实体显示隐藏
   const changeCesiumMarkers = (markers: CesiumMarker[]) => {
     markers.forEach(m => {
-      if (!m.lng || !m.lat) return
+      if (!m.lng || !m.lat) return console.log('坐标信息不全', m);
       if (markerInstances[m.id]) {
         markerInstances[m.id].changeMarkerVisible(m.visible);
       } else if (m.visible) {
@@ -180,9 +181,26 @@ export default function useCesiumMap () {
     viewer.entities.remove(entity)
   }
   // 移除地图上所有实体
-  const removeAllEntities = (entities: Entity[] = []) => {
-    entities.map(entity => removeCesiumEntity(entity))
+  const removeAllEntities = () => {
     removeCesiumMarkers()
+    removeCesiumEntity(wallMarker)
+    removeCesiumEntity(preCreateMarker)
+  }
+  // 移除地图上所有实体
+  const createMarkerByClickCesiumMap = (m: CesiumMarker) => {
+    if (m.lng && m.lat && m.alt) {
+      const marker = createMarker({
+        icon: m.icon || markerIcon,
+        size: [40, 40],
+        position: {
+          lng: m.lng,
+          lat: m.lat,
+          alt: m.alt || 50
+        }
+      })
+      preCreateMarker = marker
+      viewer.entities.add(marker)
+    }
   }
   return {
     initCesiumMap,
@@ -195,5 +213,6 @@ export default function useCesiumMap () {
     removeCesiumMarkers,
     removeCesiumEntity,
     removeAllEntities,
+    createMarkerByClickCesiumMap,
   }
 }

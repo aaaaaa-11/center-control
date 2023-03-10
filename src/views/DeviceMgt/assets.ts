@@ -9,4 +9,9 @@ export const tableColumns = [
     dataIndex: 'region_name',
     key: 'region_name',
   },
+  {
+    title: '操作',
+    dataIndex: 'action',
+    key: 'action',
+  },
 ]

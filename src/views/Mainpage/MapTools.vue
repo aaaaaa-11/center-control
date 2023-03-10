@@ -49,7 +49,7 @@ const tools = reactive<ToolItem[]>([
 // 俯瞰视角切换
 const overlookAction = (active:boolean) => {
   const pos = active ? config.overlookPos : config.cameraTo
-  mapAction('setPos', pos)
+  mapAction('setViewer', pos)
 }
 
 // 定时切换视角（漫游ing）
