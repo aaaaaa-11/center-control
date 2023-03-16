@@ -20,7 +20,7 @@ npm run build
 ```
 
 [演示地址](http://39.103.239.250:17890/#/login)  
-<video src="./public/screenCapture.mov" controls=""></video>  
+![演示动图](./public/screenCapture.gif)
 买的最便宜的一个云服务器，性能不是很好，加载cesium.js需要很久  
 前端部署用nginx  
 后端用nodejs+pm2进程管理  
