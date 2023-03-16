@@ -1,5 +1,5 @@
 <template>
-  <div class="device-tree-wrap">
+  <div class="blue-scrollbar device-tree-wrap">
     <a-tree
       class="device-tree"
       v-model:expandedKeys="expandedKeys"
@@ -46,12 +46,18 @@ const checkItems = (keys:number[]) => {
   const hideMarkers:TreeItem[] = []
   deviceList.forEach((item) => {
     if (keys.includes(item.id)) {
-      showMarkers.push(item)
+      showMarkers.push({
+        ...item,
+        visible: true
+      })
     } else {
-      hideMarkers.push(item)
+      hideMarkers.push({
+        ...item,
+        visible: false
+      })
     }
   })
-  console.log(showMarkers.map(i => i.id), hideMarkers.map(i => i.id));
+  mapStore.mapAction('changeMarkersVisible', [...showMarkers, ...hideMarkers])
 }
 const loading = ref(false)
 
@@ -71,8 +77,8 @@ const addDevice = (tree:TreeItem[]) => {
         if (!item.children) {
           item.children = []
         }
-        deviceList = res.list
-        const list = deviceList.map(i => ({
+        deviceList = [...deviceList, ...res.list]
+        const list = res.list.map(i => ({
           ...i,
           key: i.id,
           title: i.name,
@@ -90,7 +96,7 @@ const addDevice = (tree:TreeItem[]) => {
 
 // 获取区域树下所有设备
 const getData = () => {
-  const val = regionList.value
+  const val:RegionItem[] = JSON.parse(JSON.stringify(regionList.value))
   loading.value = true
   // 这里将region的key取负数，和区域key区分开
   const data = val.map(i => {
@@ -125,7 +131,8 @@ watch(regionList, (val) => {
 <style lang="less">
 .device-tree-wrap {
   height: calc(100% - 150px);
-  overflow: hidden;
+  overflow: auto;
+  padding-bottom: 20px;
   .ant-tree {
     background-color: transparent;
     color: #fff;

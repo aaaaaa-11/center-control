@@ -2,7 +2,7 @@
   <div class="blue-border device-pos-wrap" v-show="visible">
     <p>
       请点击地图，生成点位坐标
-      <span class="pos-abs pointer close-icon">X</span>
+      <span class="pos-abs pointer close-icon" @click="close">X</span>
     </p>
     <p>经度：{{ pos.lng }}</p>
     <p>纬度：{{ pos.lat }}</p>
@@ -17,7 +17,8 @@
 <script setup lang="ts">
 import { ref, reactive, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue';
-import { useMapStore } from '@/store/useMapStore';
+import { useMapStore } from '@/stores/useMapStore';
+const mapStore = useMapStore()
 
 type nl = number | null
 type Pos = {
@@ -26,8 +27,14 @@ type Pos = {
   alt: nl,
   id: number
 }
+type Position = {
+  lng: number,
+  lat: number,
+  alt: number,
+  id: number
+}
 const emit = defineEmits<{
-  (e:'submit', params:Pos):void
+  (e:'submit', params:Position):void
 }>()
 
 const visible = ref(false)
@@ -38,8 +45,20 @@ const pos = reactive<Pos>({
   alt: null,
   id: 0
 })
+
+const setPos = (position:Pos) => {
+  const { lng, lat, alt} = position
+  pos.lng = lng
+  pos.lat = lat
+  pos.alt = alt
+  mapStore.mapAction('createMarkerByClickMap', {
+    id: new Date().getTime(),
+    ...{ lng, lat, alt}
+  })
+  console.log(pos);
+}
 const open = (item:Pos) => {
-  useMapStore.switchOpenPos(true)
+  mapStore.switchOpenPos(true, setPos)
   visible.value = true
   pos.id = 0
   resetForm()
@@ -48,7 +67,7 @@ const open = (item:Pos) => {
 }
 const submit = () => {
   if (pos.lng && pos.lat && pos.alt) {
-    emit('submit', pos)
+    emit('submit', pos as Position)
   } else {
     message.error('请选择地址')
   }
@@ -59,12 +78,13 @@ const resetForm = () => {
   pos.alt = null
 }
 const close = () => {
-  useMapStore.switchOpenPos(false)
+  mapStore.switchOpenPos(false, setPos)
+  mapStore.mapAction('removePreCreateMarker')
   visible.value = false
 }
 
 onBeforeUnmount(() => {
-  useMapStore.switchOpenPos(false)
+  close()
 })
 defineExpose({
   open,

@@ -1,5 +1,5 @@
 <template>
-  <div class="pos-rel full over-hidden login-page">
+  <div class="login-page">
     <p class="text-center fs32 login-page-title">{{ title }}</p>
     <div class="login-page-bg pos-abs full"></div>
     <div class="pos-abs login-page-panel">

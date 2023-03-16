@@ -136,3 +136,14 @@ p {
 .blue-box {
   background-color: @boxBgc;
 }
+.blue-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: @bgcBlue;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .2);
+  }
+}

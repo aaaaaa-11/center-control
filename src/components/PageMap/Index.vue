@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { useMapStore } from '@/stores/useMapStore'
 const { mapAction } = useMapStore()
 

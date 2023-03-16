@@ -2,7 +2,6 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '@/views/Home.vue'
 import { useUserStore } from '@/stores/useUserStore'
 import type { Permission } from '@/stores/useUserStore'
-import ls from '@/localStore'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -91,6 +90,10 @@ const router = createRouter({
 
 router.beforeEach((to, from ,next) => {
   const userStore = useUserStore()
+  const el = document.getElementById('loading-page')
+  if (el) {
+    el.style.display = ''
+  }
   if (to.name === 'login') {
     next()
   } else if (!to.meta.auth || userStore.permission[to.meta.auth as keyof Permission]) {
@@ -99,6 +102,12 @@ router.beforeEach((to, from ,next) => {
     next({
       name: 'login'
     })
+  }
+})
+router.afterEach((to, from) => {
+  const el = document.getElementById('loading-page')
+  if (el) {
+    el.style.display = 'none'
   }
 })
 

@@ -7,7 +7,7 @@ import router from './router'
 import AntdV from 'ant-design-vue'
 
 import 'ant-design-vue/dist/antd.less'
-import './assets/main.css'
+import './assets/less/clear.css'
 import './assets/less/index.less'
 
 const app = createApp(App)

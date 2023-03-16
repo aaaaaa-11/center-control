@@ -1,5 +1,5 @@
 import config from '@/config'
-import type { Entity, Viewer } from 'cesium'
+import type { Cartesian3, Entity, ScreenSpaceEventHandler, Viewer } from 'cesium'
 import useCesium, { type CesiumPos } from './useCesium'
 import useArrowWall, { type WallOptions } from './useArrowWall'
 import useCesiumTiles, { type WaterItem } from './useCesiumTiles'
@@ -8,7 +8,7 @@ import markerIcon from '@/assets/icon/position.png'
 
 const Cesium = useCesium()
 const { createCesium3DTileset, initWater } = useCesiumTiles()
-const { createMarker } = useCesiumMarker()
+const { createMarker, changeMarkerVisible } = useCesiumMarker()
 const { createWall, changeWallVisible } = useArrowWall()
 
 export interface CesiumMarker {
@@ -22,6 +22,8 @@ export interface CesiumMarker {
 
 let markerInstances:any = {} // 设备点位
 let wallMarker: any // 路线
+// 设置cesium的click事件监听
+const eventMap:any = new Map() // 存储事件以及对应处理的函数
 let preCreateMarker: any // 设备管理里面创建的点位
 export default function useCesiumMap () {
   let viewer: Viewer
@@ -79,6 +81,64 @@ export default function useCesiumMap () {
       ...baseConfig,
       ...configOptions
     })
+
+    const handler:ScreenSpaceEventHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas) // 处理用户输入事件
+    // 设置要在输入事件上执行的函数，这里对单击做操作
+    // 如果要对多个事件执行类似的操作，可以定义一个事件数组，遍历调用handler.setInputAction
+    eventMap.click = new Map() // 回头在这个Map对象上添加地图/entity的点击事件回调函数
+    handler.setInputAction((e:any) => {
+      // 调用当前点击事件中存储的回调函数
+      const pos = e.position
+      const pick = viewer.scene.pick(pos)
+      if (Cesium.defined(pick)) {
+        if (pick.id && eventMap.click.has(pick.id)) { // 点击到了实体上
+          const cbs = eventMap.click.get(pick.id)
+            for (const callback of cbs.values()) {
+              callback({
+                x: pos.x,
+                y: pos.y
+              })
+            }
+        } else if (eventMap.click.has('cesiumMap')) { // 点击到了地图上
+          const sceneCart = viewer.scene.pickPosition(pos)
+          const position = cartesian3ToWGS84(sceneCart)
+          clickMap(position) // 拿到回调函数
+        }
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  }
+
+  function cartesian3ToWGS84 (cartesian: Cartesian3) {
+    const ellipsoid = viewer.scene.globe.ellipsoid
+    const cartesian3 = new Cesium.Cartesian3(cartesian.x, cartesian.y, cartesian.z)
+    const cartographic = ellipsoid.cartesianToCartographic(cartesian3)
+    const lat = Cesium.Math.toDegrees(cartographic.latitude)
+    const lng = Cesium.Math.toDegrees(cartographic.longitude)
+    const alt = cartographic.height
+    return { lng, lat, alt }
+  }
+
+  const clickMap = (pos:any) => {
+    const cbs = eventMap.click.get('cesiumMap') // 拿到回调函数
+    for (const callback of cbs.values()) {
+      callback(pos)
+    }
+  }
+  // 监听事件
+  const on = (item:any, cb:any) => {
+    if (!eventMap.click.get(item)) {
+      eventMap.click.set(item, new Set()) // 用一个set存储item的点击事件回调函数
+    }
+    const cbSet = eventMap.click.get(item)
+    // 添加监听事件
+    cbSet.add(cb)
+  }
+  // 移除监听
+  const off = (item:any, cb:any) => {
+    const cbSet = eventMap.click.get(item)
+    if (cbSet && cbSet.has(cb)) {
+      cbSet.delete(cb)
+    }
   }
 
   // 切换视角
@@ -150,10 +210,11 @@ export default function useCesiumMap () {
 
   // 创建实体/改变实体显示隐藏
   const changeCesiumMarkers = (markers: CesiumMarker[]) => {
+    console.log(markers);
     markers.forEach(m => {
       if (!m.lng || !m.lat) return console.log('坐标信息不全', m);
       if (markerInstances[m.id]) {
-        markerInstances[m.id].changeMarkerVisible(m.visible);
+        changeMarkerVisible(m.visible, markerInstances[m.id]);
       } else if (m.visible) {
         const marker = createMarker({
           icon: m.icon || markerIcon,
@@ -184,10 +245,11 @@ export default function useCesiumMap () {
   const removeAllEntities = () => {
     removeCesiumMarkers()
     removeCesiumEntity(wallMarker)
-    removeCesiumEntity(preCreateMarker)
+    removePreCreateMarker()
   }
-  // 移除地图上所有实体
+  // 点击地图预创建设备点位
   const createMarkerByClickCesiumMap = (m: CesiumMarker) => {
+    removePreCreateMarker()
     if (m.lng && m.lat && m.alt) {
       const marker = createMarker({
         icon: m.icon || markerIcon,
@@ -202,6 +264,11 @@ export default function useCesiumMap () {
       viewer.entities.add(marker)
     }
   }
+  // 清楚预设备点位
+  const removePreCreateMarker = () => {
+    preCreateMarker && removeCesiumEntity(preCreateMarker)
+    preCreateMarker = null
+  }
   return {
     initCesiumMap,
     cesiumFlyTo,
@@ -213,6 +280,9 @@ export default function useCesiumMap () {
     removeCesiumMarkers,
     removeCesiumEntity,
     removeAllEntities,
+    viewerOn: on,
+    viewerOff: off,
     createMarkerByClickCesiumMap,
+    removePreCreateMarker,
   }
 }

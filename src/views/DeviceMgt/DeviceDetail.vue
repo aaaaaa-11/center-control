@@ -49,7 +49,10 @@ enum DialogType {
 type FormState = {
   name: string,
   region_id: number
-  id?: number
+  id?: number,
+  lng?:number,
+  lat?:number,
+  alt?:number,
 }
 const dialogType = ref(DialogType.ADD)
 
@@ -74,7 +77,12 @@ const editPos = (item:FormState) => {
   positionDialog.value?.open(item)
 }
 // 确认增/改
-const confirmSubmit = (val:FormState) => {
+const confirmSubmit = (val:FormState|{
+  lng: number,
+  lat: number,
+  alt: number,
+  id: number
+}) => {
   const type = dialogType.value === DialogType.ADD ? DeviceAction.c : DeviceAction.u
   deviceStore.deviceAction(type, val).then(res => {
     deviceDialog.value?.close()

@@ -16,14 +16,14 @@ handler.setInputAction(click => {
   // 调用当前点击事件中存储的回调函数
   if (clickEntity) { // 点击到了实体上
     // 假设实体marker和对应回调函数以键值对形式存储在Map对象中
-    callCB(marker, params) // 拿到回调函数
+    callback(marker, params) // 拿到回调函数
   } else { // 点击到了地图上
     // 假设'cesiumMap'和对应回调以键值对形式存储在Map对象中
-    callCB('cesiumMap', params) // 拿到回调函数
+    callback('cesiumMap', params) // 拿到回调函数
   }
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
 
-function callCB (item, params) {
+function callback (item, params) {
   const cbs = eventMap['click'].get(item) // 拿到回调函数
   // 遍历执行回调，并传参
   // 。。。

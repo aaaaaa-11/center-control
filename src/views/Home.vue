@@ -1,5 +1,5 @@
 <template>
-  <div class="full over-hidden pos-rel home-page">
+  <div class="home-page">
     <PageMap />
     <PageHeader />
     <RouterView class="pos-abs router-page"/>

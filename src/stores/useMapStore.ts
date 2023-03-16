@@ -11,6 +11,9 @@ const {
   changeCesiumWallVisible,
   changeCesiumMarkers,
   createMarkerByClickCesiumMap,
+  viewerOff,
+  viewerOn,
+  removePreCreateMarker,
 } = useCesiumMap()
 
 export const enum MapTypeHooks {
@@ -20,15 +23,6 @@ export const enum MapTypeHooks {
 
 const mapType = ref<MapTypeHooks>(MapTypeHooks.CESIUM)
 export const useMapStore = defineStore('map', () => {
-  const openPos = ref<boolean>(false) // 开启点位选择，为true时点击地图可返回坐标信息
-  const switchOpenPos = (open: boolean) => {
-    openPos.value = open
-    //   if (open) { // 开启监听
-    //     addEventListener // 点击地图时，生成点位
-    //   } else {
-    //     // 关闭监听
-    //   }
-  }
 
   const mapActions:any = {
     [MapTypeHooks.CESIUM]: {
@@ -40,7 +34,8 @@ export const useMapStore = defineStore('map', () => {
       flyTo: cesiumFlyTo,
       changeWallVisible: changeCesiumWallVisible,
       changeMarkersVisible: changeCesiumMarkers,
-      createMarkerByClickMap: createMarkerByClickCesiumMap
+      createMarkerByClickMap: createMarkerByClickCesiumMap,
+      removePreCreateMarker,
     },
     [MapTypeHooks.AMAP]: {
       initMap: () => {}
@@ -50,8 +45,16 @@ export const useMapStore = defineStore('map', () => {
   const mapAction = (aipName: string, ...params: any[]) => {
     const action = mapActions[mapType.value][aipName]
     if (!action) return
-    console.log(params)
+    console.log(aipName, params)
     action(...params)
+  }
+
+  const switchOpenPos = (open:boolean, cb:any) => {
+    if (open) {
+      viewerOn('cesiumMap', cb)
+    } else {
+      viewerOff('cesiumMap', cb)
+    }
   }
 
   return {
@@ -60,66 +63,3 @@ export const useMapStore = defineStore('map', () => {
     switchOpenPos,
   }
 })
-// export const useMapStore = defineStore('map', () => {
-
-//   const mapType = ref<MapTypeHooks>(MapTypeHooks.CESIUM)
-//   let pageMap:any = {}
-
-//   const initCesium = (mapId: string) => {
-//     pageMap.viewer = initCesiumMap(mapId)
-//     create3Dtileset(false)
-//   }
-//   const initAMap = (mapId: string) => {
-//   }
-//   const initMap = (mapId: string) => {
-//     console.log('initMap');
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       initCesium(mapId)
-//     } else {
-//       initAMap(mapId)
-//     }
-//   }
-
-//   const getPos = () => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return getCameraPos()
-//     }
-//   }
-//   const setViewer = (pos:CesiumPos) => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return setCesiumViewer(pos)
-//     }
-//   }
-//   const flyToPos = (pos:CesiumPos) => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return cesiumFlyTo(pos)
-//     }
-//   }
-//   const createWall = (options:WallOptions) => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return createCesiumArrowWall(options)
-//     }
-//   }
-//   const changeMarkers = (markers:Array<any>) => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return changeCesiumMarkers(markers)
-//     }
-//   }
-//   const removeMarkers = () => {
-//     if (mapType.value === MapTypeHooks.CESIUM) {
-//       return removeCesiumMarkers()
-//     }
-//   }
-//   return {
-//     mapType,
-//     initMap,
-//     setViewer,
-//     flyToPos,
-//     getPos,
-//     pageMap,
-//     createWall,
-//     changeWallVisible,
-//     changeMarkers,
-//     removeMarkers,
-//   }
-// })

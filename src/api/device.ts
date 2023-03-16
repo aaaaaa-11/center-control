@@ -16,6 +16,9 @@ export const queryDeviceList = (params: DeviceListParams) => {
 type DeviceItem = {
   region_id: number,
   name: string,
+  lng: number | null,
+  lat: number | null,
+  alt: number | null,
   id?: number
 }
 export const createDevice = (params: DeviceItem) => {
@@ -24,8 +27,8 @@ export const createDevice = (params: DeviceItem) => {
 }
 // 修改设备
 export const updateDevice = (params: DeviceItem) => {
-  const { region_id, name, id } = params
-  return axios.post('/device/update_device', { region_id, name, id })
+  const { region_id, name, id, lng, lat, alt } = params
+  return axios.post('/device/update_device', { region_id, name, id, lng, lat, alt })
 }
 // 删除设备
 export const deleteDevice = (id: number) => {
