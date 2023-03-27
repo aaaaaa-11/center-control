@@ -99,6 +99,9 @@ p {
   &-bottom {
     background-image: linear-gradient(to bottom, @blue, transparent);
   }
+  &-top {
+    background-image: linear-gradient(to top, @blue, transparent);
+  }
   &-left {
     background-image: linear-gradient(to left, @blue, transparent);
   }
@@ -122,8 +125,9 @@ p {
 }
 .blue-btn {
   .pointer;
-  border: 1px solid @blue;
+  border: 1px solid @lightBlue;
   border-radius: 8px;
+  background-color: #29b8cb33;
   &--active {
     background-color: #29b7cb;
   }
@@ -145,5 +149,27 @@ p {
   }
   &::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, .2);
+  }
+}
+
+.table-page {
+  .full;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  .form {
+    margin-bottom: 20px;
+    &-item-btn {
+      flex: 1;
+      text-align: right;
+      margin-right: 0;
+    }
+  }
+  .table {
+    flex: 1;
+    .ant-table table,
+    .ant-table-thead > tr > th {
+      text-align: center;
+    }
   }
 }

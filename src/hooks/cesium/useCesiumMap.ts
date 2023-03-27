@@ -197,14 +197,20 @@ export default function useCesiumMap () {
       })
     })
   }
+  // 视角适应地图实体
+  const setViewerFitEntities = () => {
+    viewer.zoomTo(viewer.entities)
+  }
   // 创建箭头路线
   const changeCesiumWallVisible = (options:WallOptions) => {
     console.log(options, wallMarker);
     if (!wallMarker) {
       wallMarker = createWall(options)
       viewer.entities.add(wallMarker)
+      setViewerFitEntities()
     } else {
       changeWallVisible(options.visible, wallMarker)
+      options.visible && setViewerFitEntities()
     }
   }
 
@@ -214,7 +220,7 @@ export default function useCesiumMap () {
     markers.forEach(m => {
       if (!m.lng || !m.lat) return console.log('坐标信息不全', m);
       if (markerInstances[m.id]) {
-        changeMarkerVisible(m.visible, markerInstances[m.id]);
+        changeMarkerVisible(m.visible as boolean, markerInstances[m.id]);
       } else if (m.visible) {
         const marker = createMarker({
           icon: m.icon || markerIcon,
@@ -244,8 +250,8 @@ export default function useCesiumMap () {
   // 移除地图上所有实体
   const removeAllEntities = () => {
     removeCesiumMarkers()
-    removeCesiumEntity(wallMarker)
     removePreCreateMarker()
+    removeWallMarker()
   }
   // 点击地图预创建设备点位
   const createMarkerByClickCesiumMap = (m: CesiumMarker) => {
@@ -264,10 +270,15 @@ export default function useCesiumMap () {
       viewer.entities.add(marker)
     }
   }
-  // 清楚预设备点位
+  // 清除预设备点位
   const removePreCreateMarker = () => {
     preCreateMarker && removeCesiumEntity(preCreateMarker)
     preCreateMarker = null
+  }
+  // 清除路线
+  const removeWallMarker = () => {
+    wallMarker && removeCesiumEntity(wallMarker)
+    wallMarker = null
   }
   return {
     initCesiumMap,
@@ -284,5 +295,7 @@ export default function useCesiumMap () {
     viewerOff: off,
     createMarkerByClickCesiumMap,
     removePreCreateMarker,
+    removeWallMarker,
+    setViewerFitEntities,
   }
 }

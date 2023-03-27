@@ -2,10 +2,23 @@
   <div id="loading-page">
     <img class="loading-icon" src="/loading.png" alt="">
   </div>
-  <RouterView class="pos-rel over-hidden full" />
+
+  <a-config-provider :locale="locale">
+    <RouterView class="pos-rel over-hidden full" />
+  </a-config-provider>
+  <div class="pos-abs bg-blue-top block page-footer">
+    <div style="width:300px;margin:0 auto; padding:20px 0;">
+		 		<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34082202000368" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="@/assets/icon/beian.png" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#fff;">皖公网安备 34082202000368号</p></a>
+		 	</div>
+  </div>
 </template>
 
 <script setup lang="ts">
+  import zhCN from 'ant-design-vue/es/locale/zh_CN';
+  import dayjs from 'dayjs';
+  import 'dayjs/locale/zh-cn';
+  const locale = zhCN
+  dayjs.locale('zh-cn');
 </script>
 
 <style lang="less">
@@ -21,6 +34,11 @@ body,
   background-color: @bgBlue;
   color: #fff;
   overflow: auto;
+  position: relative;
+  .page-footer {
+    z-index: 1000;
+    bottom: 0;
+  }
 }
 #loading-page {
   position: absolute;

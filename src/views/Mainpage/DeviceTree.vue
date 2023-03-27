@@ -1,7 +1,7 @@
 <template>
   <div class="blue-scrollbar device-tree-wrap">
     <a-tree
-      class="device-tree"
+      class="blue-tree device-tree"
       v-model:expandedKeys="expandedKeys"
       v-model:selectedKeys="selectedKeys"
       v-model:checkedKeys="checkedKeys"
@@ -21,10 +21,10 @@
 import { useRegionStore, type RegionItem } from '@/stores/useRegionStore';
 import { useDeviceStore, type DeviceItem } from '@/stores/useDeviceStore';
 import { useMapStore } from '@/stores/useMapStore';
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, watch, computed, nextTick, onBeforeUnmount } from 'vue'
 import { arrToTree, type ArrItem } from '@/utils/utils';
 
-const mapStore = useMapStore()
+const { mapAction } = useMapStore()
 const deviceStore = useDeviceStore()
 const regionStore = useRegionStore()
 const regionList = computed(() => regionStore.regionList)
@@ -57,9 +57,9 @@ const checkItems = (keys:number[]) => {
       })
     }
   })
-  mapStore.mapAction('changeMarkersVisible', [...showMarkers, ...hideMarkers])
+  mapAction('changeMarkersVisible', [...showMarkers, ...hideMarkers])
+  mapAction('setViewerFitEntities')
 }
-const loading = ref(false)
 
 
 // 将设备挂到区域下
@@ -95,6 +95,7 @@ const addDevice = (tree:TreeItem[]) => {
 }
 
 // 获取区域树下所有设备
+const loading = ref(false)
 const getData = () => {
   const val:RegionItem[] = JSON.parse(JSON.stringify(regionList.value))
   loading.value = true
@@ -125,6 +126,14 @@ watch(regionList, (val) => {
   getData()
 }, {
   immediate: true
+})
+
+onBeforeUnmount(() => {
+  const hideMarkers = deviceList.map((item) => ({
+    ...item,
+    visible: false
+  }))
+  mapAction('changeMarkersVisible', hideMarkers)
 })
 </script>
 

@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import config from '@/config';
-import { reactive } from 'vue'
+import { onBeforeUnmount, reactive } from 'vue'
 import roamData from './roamData.json'
 import busData from './busData.json'
 import type { CesiumPos } from '@/hooks/cesium/useCesium';
@@ -91,6 +91,10 @@ const handleAction = (t:ToolItem) => {
   t.active = !t.active
   toolsAction[t.value](t.active)
 }
+
+onBeforeUnmount(() => {
+  mapAction('removeWallMarker')
+})
 </script>
 
 <style lang="less">

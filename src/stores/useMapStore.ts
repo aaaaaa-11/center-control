@@ -14,6 +14,8 @@ const {
   viewerOff,
   viewerOn,
   removePreCreateMarker,
+  removeWallMarker,
+  setViewerFitEntities
 } = useCesiumMap()
 
 export const enum MapTypeHooks {
@@ -36,6 +38,8 @@ export const useMapStore = defineStore('map', () => {
       changeMarkersVisible: changeCesiumMarkers,
       createMarkerByClickMap: createMarkerByClickCesiumMap,
       removePreCreateMarker,
+      removeWallMarker,
+      setViewerFitEntities,
     },
     [MapTypeHooks.AMAP]: {
       initMap: () => {}

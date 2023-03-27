@@ -13,7 +13,7 @@ export type WallOptions = {
 
 export default function useCesiumArrowWall () {
   const createWall = (wallOptions: WallOptions) => {
-    const { clampToGround = false, depthTest = false, color = '#fbb929', points = [], width = 30 } = wallOptions
+    const { clampToGround = true, depthTest = false, color = '#fbb929', points = [], width = 20 } = wallOptions
     const arr = points.reduce((prev:any, cur) => {
       return [...prev, cur.lng, cur.lat, cur.alt]
     }, [])

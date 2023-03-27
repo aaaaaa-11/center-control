@@ -7,7 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import PageMap from '@/components/PageMap/Index.vue'
 import PageHeader from '@/components/PageHeader/Index.vue'
 import { useRegionStore } from '@/stores/useRegionStore';
@@ -20,7 +19,7 @@ getAllRegions()
   @height: @headerH + 10px;
   .router-page {
     top: @height;
-    height: calc(100% - @height);
+    height: calc(100% - @height - 40px);
   }
 }
 </style>
