@@ -1,5 +1,25 @@
-import * as echarts from 'echarts'
 import dayjs from 'dayjs'
+import * as echarts from 'echarts/core';
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent
+} from 'echarts/components';
+import { BarChart, LineChart } from 'echarts/charts';
+import { UniversalTransition } from 'echarts/features';
+import { CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  BarChart,
+  LineChart,
+  CanvasRenderer,
+  UniversalTransition
+]);
 const data = new Array(7).fill(null).map((i, idx) => {
   return {
     name: dayjs().subtract(idx, 'days').format('MM-DD'),

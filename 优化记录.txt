@@ -1,0 +1,12 @@
+2023-03-28:
+1. 所有页面路由懒加载
+一般先访问Login.vue，登录后会加载Home.vue，之前Home.vue没有做路由懒加载，登录页面打开会慢很多
+所有页面都做了路由懒加载后，进登录页会快一点
+问题1: 加载Home.vue会慢一点
+问题2: 加载Home时部分资源503；原因：发现是我nginx设置了限制每秒访问频率，可以把允许访问频率设置大一点
+2. cesium({ rebuildCesium: true }) // Default copy min cesium file to dist. if true will rebuild cesium from source.
+vite-plugin-cesium引入cesium，加了rebuildCesium: true配置会快一点
+之前没有这个配置，打包体积小，但是会单独加载cesium.js(体积大)，加载会慢一点，现在加载快一点了
+3. ant-design-vue和echarts按需导入
+4. 升级服务器
+代码如果没有什么大的问题，基本上最有效的就是给服务器充值:)

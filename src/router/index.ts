@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '@/views/Home.vue'
 import { useUserStore } from '@/stores/useUserStore'
 import type { Permission } from '@/stores/useUserStore'
 
@@ -14,7 +13,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: () => import('@/views/Home.vue'),
       redirect: {
         name: 'mainpage'
       },
