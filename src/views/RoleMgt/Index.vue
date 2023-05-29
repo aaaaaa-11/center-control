@@ -7,7 +7,7 @@
       :model="formState">
       <a-form-item name="name">
         <a-input
-          class="default-input"
+          class="filter-input default-input"
           placeholder="请输入角色名称"
           v-model:value="formState.name"></a-input>
       </a-form-item>
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import useTable, { ACTIONTYPES } from '@/hooks/useTable'
+import useTable, { DATATYPES } from '@/hooks/useTable'
 import columns from './columns'
 import { message } from 'ant-design-vue';
 
@@ -45,7 +45,7 @@ type RoleItem = {
 const formState = reactive({
   name: ''
 })
-const { tableData, getData, loading } = useTable(ACTIONTYPES.ROLE)
+const { tableData, getData, loading } = useTable(DATATYPES.ROLE)
 getData(formState)
 
 const editRole = (item:RoleItem) => {

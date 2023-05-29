@@ -7,7 +7,7 @@
       :model="formState">
       <a-form-item name="name">
         <a-input
-          class="default-input"
+          class="filter-input default-input"
           placeholder="请输入用户名称"
           v-model:value="formState.name"></a-input>
       </a-form-item>
@@ -23,7 +23,7 @@
         <template v-if="column.key === 'action'">
           <a-space>
             <a-button type="primary" @click="editUser(record)">编辑</a-button>
-            <a-button type="danger" @click="editUser(record)">删除</a-button>
+            <a-button v-show="!record.admin" type="danger" @click="deleteUser(record)">删除</a-button>
           </a-space>
         </template>
       </template>
@@ -33,9 +33,9 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import useTable, { ACTIONTYPES } from '@/hooks/useTable'
+import useTable, { DATATYPES } from '@/hooks/useTable'
 import columns from './columns'
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 
 type UserItem = {
   id: number,
@@ -46,14 +46,29 @@ type UserItem = {
 const formState = reactive({
   name: ''
 })
-const { tableData, getData, loading } = useTable(ACTIONTYPES.USER)
+const { tableData, loading, getData, deleteData } = useTable(DATATYPES.USER)
 getData(formState)
 
 const editUser = (item:UserItem) => {
   message.error('暂无权限')
 }
 const addUser = () => {
-  message.error('暂无权限')
+}
+
+const deleteUser = (item:UserItem) => {
+  Modal.confirm({
+    title: () => '确认删除该用户?',
+    okText: () => '确认',
+    okType: 'danger',
+    cancelText: () => '取消',
+    onOk() {
+      deleteData({
+        id: item.id
+      }, () => getData(formState))
+    },
+    onCancel() {
+    },
+  });
 }
 
 </script>

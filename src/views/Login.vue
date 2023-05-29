@@ -103,7 +103,7 @@ const handleLoginRes = (res:any, returnToken:boolean = false) => {
   const { code, data, msg } = res.data
   if (code === 0) {
     let page = $route.query?.from
-    const { permission, user_name, user_id, role_id, role_name, token } = data
+    const { permission, name: user_name, id: user_id, role_id, role_name, token } = data
     if (returnToken && !token) {
       return
     }
@@ -160,7 +160,7 @@ const policyChecked = ref<boolean>(true)
 const second = ref<number>(60)
 const beforeGetCode = ref<boolean>(true)
 const formState = reactive({
-  username: 'user01',
+  username: 'user02',
   password: '123hhh',
   phone: '13300000000',
   code: ''
