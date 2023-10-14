@@ -109,10 +109,9 @@ const handleLoginRes = (res:any, returnToken:boolean = false) => {
     }
     returnToken && ls.set('token', token, 60 * 60 * 24 * 1000)
     try {
-      const parsePermission = JSON.parse(permission)
-      userStore.permission = parsePermission
-      if (!page || page && !parsePermission[page as string]) {
-        page = Object.keys(parsePermission).find(key => parsePermission[key]) || null
+      userStore.permission = permission
+      if (!page || page && !permission[page as string]) {
+        page = Object.keys(permission).find(key => permission[key]) || null
       }
       if (!page) {
         return message.error('暂无页面权限')
