@@ -5,18 +5,30 @@
         text-center pos-rel fs16
         page-menu-item
         blue-btn
-        ${activePage === m.routeName || m.children?.find(c => c.routeName === activePage) ? 'blue-btn--active' : ''}`"
+        ${
+          activePage === m.routeName ||
+          m.children?.find((c) => c.routeName === activePage)
+            ? 'blue-btn--active'
+            : ''
+        }`"
       :key="m.auth"
       v-for="m in menuList"
       @mouseenter="showChildren(m)"
       @mouseleave="hideChildren(m)"
-      @click="goPage(m)">
+      @click="goPage(m)"
+    >
       <span>{{ m.name }}</span>
       <div v-show="m.children && m.showChildren" class="pos-abs sub-menu">
-        <p v-for="c in m.children"
+        <p
+          v-for="c in m.children"
           :key="c.name"
-          :class="`sub-menu-item ${activePage === c.routeName ? 'sub-menu-item--active' : ''}`"
-          @click="goPage(c)">{{ c.name }}</p>
+          :class="`sub-menu-item ${
+            activePage === c.routeName ? 'sub-menu-item--active' : ''
+          }`"
+          @click="goPage(c)"
+        >
+          {{ c.name }}
+        </p>
       </div>
     </div>
     <!-- <a-menu v-model:selectedKeys="activePage" mode="horizontal">
@@ -37,8 +49,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router';
-import { useNavStore, type NavItem, } from '@/stores/useNavStore'
+import { useRoute, useRouter } from 'vue-router'
+import { useNavStore, type NavItem } from '@/stores/useNavStore'
 const navStore = useNavStore()
 const $route = useRoute()
 const $router = useRouter()
@@ -59,14 +71,14 @@ watch(navData, (val) => {
 //     menuList.value = menuList_
 //   }
 // }
-const showChildren = (item:NavItem) => item.showChildren = true
-const hideChildren = (item:NavItem) => item.showChildren = false
+const showChildren = (item: NavItem) => (item.showChildren = true)
+const hideChildren = (item: NavItem) => (item.showChildren = false)
 
-const goPage = (item:NavItem) => {
-  if (item.routeName) {
-    $router.push({ name: item.routeName })
-  } else if (item.link) {
+const goPage = (item: NavItem) => {
+  if (item.link) {
     window.open(item.link, '_blank')
+  } else if (item.routeName) {
+    $router.push({ name: item.routeName })
   }
 }
 </script>

@@ -1,12 +1,12 @@
 export default [
   {
     title: '角色名称',
-    dataIndex: 'name',
-    key: 'name'
+    dataIndex: 'roleName',
+    key: 'roleName',
   },
   {
     title: '操作',
     dataIndex: 'action',
-    key: 'action'
+    key: 'action',
   },
 ]

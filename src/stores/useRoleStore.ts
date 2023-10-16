@@ -2,9 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import ls from '@/localStore'
 
-export const useUserStore = defineStore('user', () => {
-  const visitInfo = ref<number>(0) // 用户访问次数
-
+export const useRoleStore = defineStore('role', () => {
   const userInfo = ref<User>({})
   const permission = ref<Permission>([])
 
@@ -19,6 +17,5 @@ export const useUserStore = defineStore('user', () => {
     userInfo,
     permission,
     clearUserInfo,
-    visitInfo,
   }
 })

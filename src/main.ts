@@ -21,7 +21,7 @@ import {
   Tree,
 } from 'ant-design-vue'
 
-import 'ant-design-vue/dist/antd.less'
+import 'ant-design-vue/dist/reset.css';
 import './assets/less/index.less'
 
 const app = createApp(App)
@@ -45,5 +45,9 @@ const coms = [
   Table
 ]
 coms.forEach(com => app.use(com))
+
+const hasShow = await import('./vHasShow')
+
+app.directive('hasShow', hasShow.default)
 
 app.mount('#app')

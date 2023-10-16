@@ -1,13 +1,13 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { useUserStore, type Permission } from './useUserStore'
 import config from '@/config'
+import getRouterAuth from '@/router/routerAuth'
 
-export type NavItem = {
+export interface NavItem {
   name: string,
   routeName?: string,
-  link?: string,
   auth: string,
+  link?: string,
   showChildren?: boolean,
   children?: Array<NavItem>
 }
@@ -18,15 +18,14 @@ navData.map(n => {
   }
 })
 export const useNavStore = defineStore('nav', () => {
-  const { permission } = useUserStore()
 
   const manuList = computed(():NavItem[] => {
     return navData.filter(n => {
       if (n.children?.length) {
-        n.children = n.children.filter(c => !c.auth || permission[c.auth as keyof Permission])
+        n.children = n.children.filter(c => getRouterAuth(c.auth))
         return n.children?.length
       } else {
-        return !n.auth || permission[n.auth as keyof Permission]
+        return getRouterAuth(n.auth)
       }
     })
   })

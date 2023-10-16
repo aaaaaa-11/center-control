@@ -1,6 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { useUserStore } from '@/stores/useUserStore'
-import type { Permission } from '@/stores/useUserStore'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -8,14 +6,14 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/Login.vue')
+      component: () => import('@/views/Login.vue'),
     },
     {
       path: '/',
       name: 'home',
       component: () => import('@/views/Home.vue'),
       redirect: {
-        name: 'mainpage'
+        name: 'mainpage',
       },
       children: [
         {
@@ -23,83 +21,85 @@ const router = createRouter({
           name: 'mainpage',
           component: () => import('@/views/Mainpage/Index.vue'),
           meta: {
-            auth: 'mainpage'
-          }
+            auth: 'mainpage',
+          },
         },
         {
           path: '/datacenter',
           name: 'datacenter',
           component: () => import('@/views/DataCenter/Index.vue'),
           meta: {
-            auth: 'datacenter'
-          }
+            auth: 'datacenter',
+          },
         },
         {
           path: '/camera',
           name: 'camera',
           component: () => import('@/views/Camera/Index.vue'),
           meta: {
-            auth: 'camera'
-          }
+            auth: 'camera',
+          },
         },
         {
           path: '/regionMgt',
           name: 'regionMgt',
           component: () => import('@/views/RegionMgt/Index.vue'),
           meta: {
-            auth: 'regionMgt'
-          }
+            auth: 'regionMgt',
+          },
         },
         {
           path: '/deviceMgt',
           name: 'deviceMgt',
           component: () => import('@/views/DeviceMgt/Index.vue'),
           meta: {
-            auth: 'deviceMgt'
-          }
+            auth: 'deviceMgt',
+          },
         },
         {
           path: '/accountMgt',
           name: 'accountMgt',
           component: () => import('@/views/AccountMgt/Index.vue'),
           meta: {
-            auth: 'accountMgt'
-          }
+            auth: 'accountMgt',
+          },
         },
         {
           path: '/roleMgt',
           name: 'roleMgt',
           component: () => import('@/views/RoleMgt/Index.vue'),
           meta: {
-            auth: 'roleMgt'
-          }
+            auth: 'roleMgt',
+          },
         },
         {
           path: '/log',
           name: 'log',
           component: () => import('@/views/Log/Index.vue'),
           meta: {
-            auth: 'log'
-          }
+            auth: 'log',
+          },
         },
-      ]
+      ],
     },
-  ]
+  ],
 })
 
-router.beforeEach((to, from ,next) => {
-  const userStore = useUserStore()
+router.beforeEach(async (to, from, next) => {
+  const getRouterAuth = await import('./routerAuth')
+
   const el = document.getElementById('loading-page')
   if (el) {
     el.style.display = ''
   }
+
   if (to.name === 'login') {
     next()
-  } else if (!to.meta.auth || userStore.permission[to.meta.auth as keyof Permission]) {
+  } else if (getRouterAuth.default(to.meta.auth as string | undefined)) {
     next()
   } else {
     next({
-      name: 'login'
+      name: 'login',
     })
   }
 })
