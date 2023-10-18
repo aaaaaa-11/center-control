@@ -19,9 +19,11 @@ import {
   Table,
   Tooltip,
   Tree,
+  Select,
+  SelectOption,
 } from 'ant-design-vue'
 
-import 'ant-design-vue/dist/reset.css';
+import 'ant-design-vue/dist/reset.css'
 import './assets/less/index.less'
 
 const app = createApp(App)
@@ -42,9 +44,11 @@ const coms = [
   Checkbox,
   Space,
   Tree,
-  Table
+  Table,
+  Select,
+  SelectOption,
 ]
-coms.forEach(com => app.use(com))
+coms.forEach((com) => app.use(com))
 
 const hasShow = await import('./vHasShow')
 

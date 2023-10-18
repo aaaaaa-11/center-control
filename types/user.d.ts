@@ -19,12 +19,11 @@ interface PhoneParams {
 }
 
 interface User {
+  userId: number
+  userName: string
   admin?: boolean
-  userId?: number
-  userName?: string
-  roleId?: number
-  phone?: string
-  roleName?: string
+  roleId: number
+  phone: string
+  roleName: string
+  password?: string
 }
-
-type Permission = string[]

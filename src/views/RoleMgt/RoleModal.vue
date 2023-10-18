@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:open="open" title="角色" @ok="handleOk" @cancel="closeModel">
+  <a-modal v-model:open="open" title="角色" @ok="handleOk" @cancel="closeModal">
     <a-form
       ref="formRef"
       :model="formState"
@@ -48,7 +48,7 @@ interface FormState {
 }
 
 const props = defineProps<{
-  modelType: string
+  modalType: string
 }>()
 
 const emits = defineEmits<{
@@ -96,20 +96,20 @@ const handleOk = () => {
 // 弹框开关
 const open = ref<boolean>(false)
 
-const openModel = (currentItem: FormState) => {
+const openModal = (currentItem: FormState) => {
   open.value = true
   if (currentItem.roleId) {
     Object.assign(formState, currentItem)
   }
 }
 
-const closeModel = () => {
+const closeModal = () => {
   formRef.value?.resetFields()
   open.value = false
 }
 
 defineExpose({
-  openModel,
-  closeModel,
+  openModal,
+  closeModal,
 })
 </script>

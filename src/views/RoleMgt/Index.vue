@@ -54,11 +54,11 @@
         </template>
       </template>
     </a-table>
-    <RoleModel
-      ref="modelRef"
+    <RoleModal
+      ref="modalRef"
       :currentItem="currentItem"
-      :modelType="modelType"
-      @close="closeModel"
+      :modalType="modalType"
+      @close="closeModal"
       @submit="submitForm"
     />
   </div>
@@ -68,8 +68,8 @@
 import { reactive } from 'vue'
 import useTable, { DATATYPES } from '@/hooks/useTable'
 import columns from './columns'
-import RoleModel from './RoleModel.vue'
-import useModel from '@/hooks/useModel'
+import RoleModal from './RoleModal.vue'
+import useModal from '@/hooks/useModal'
 
 interface FormState {
   roleId?: number
@@ -86,8 +86,15 @@ const { tableData, getData, loading, addData, editData, deleteData } = useTable(
 )
 getData(formState)
 
-const { modelRef, modelType, addItem, editItem, closeModel, openModel } =
-  useModel()
+const {
+  modalRef,
+  modalType,
+  addItem,
+  editItem,
+  deleteItem,
+  closeModal,
+  openModal,
+} = useModal()
 
 const currentItem = {
   permission: [],
@@ -96,11 +103,13 @@ const currentItem = {
 const editRole = (item: Role) => {
   Object.assign(currentItem, item)
   editItem()
-  openModel(currentItem)
+  openModal(currentItem)
 }
 
 const deleteRole = (item: Role) => {
-  deleteData(item.roleId, getData)
+  deleteItem(() => {
+    deleteData(item.roleId, getData)
+  })
 }
 
 const addRole = () => {
@@ -108,9 +117,9 @@ const addRole = () => {
 }
 
 const submitForm = (formState: FormState) => {
-  modelType.value === 'add' && addData(formState, getData)
-  modelType.value === 'edit' && editData(formState, getData)
-  closeModel()
+  modalType.value === 'add' && addData(formState, getData)
+  modalType.value === 'edit' && editData(formState, getData)
+  closeModal()
 }
 </script>
 

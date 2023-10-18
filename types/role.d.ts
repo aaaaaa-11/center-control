@@ -6,3 +6,5 @@ interface Role {
   permission: Permission[]
   admin?: boolean
 }
+
+type Permission = string[]
