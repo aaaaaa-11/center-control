@@ -30,7 +30,7 @@
   </a-modal>
 </template>
 <script lang="ts" setup>
-import { reactive, computed, ref, toRaw, watch } from 'vue'
+import { reactive, ref, toRaw } from 'vue'
 import { queryPermissionList } from '@/api/role'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
@@ -82,6 +82,7 @@ const getPermissions = () => {
 
 getPermissions()
 
+// 提交表单
 const handleOk = () => {
   formRef.value
     ?.validate()

@@ -1,31 +1,34 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import config from '@/config'
-import getRouterAuth from '@/router/routerAuth'
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 
 export interface NavItem {
-  name: string,
-  routeName?: string,
-  auth: string,
-  link?: string,
-  showChildren?: boolean,
+  name: string
+  routeName?: string
+  auth: string
+  link?: string
+  showChildren?: boolean
   children?: Array<NavItem>
 }
 const navData: NavItem[] = JSON.parse(JSON.stringify(config.navList))
-navData.map(n => {
+navData.map((n) => {
   if (n.children) {
     n.showChildren = false
   }
 })
 export const useNavStore = defineStore('nav', () => {
-
-  const manuList = computed(():NavItem[] => {
-    return navData.filter(n => {
+  const manuList = computed((): NavItem[] => {
+    return navData.filter((n) => {
       if (n.children?.length) {
-        n.children = n.children.filter(c => getRouterAuth(c.auth))
+        n.children = n.children.filter(
+          (c) => !c.auth || userStore.permission.includes(`${c.auth}:view`)
+        )
         return n.children?.length
       } else {
-        return getRouterAuth(n.auth)
+        return !n.auth || userStore.permission.includes(`${n.auth}:view`)
       }
     })
   })

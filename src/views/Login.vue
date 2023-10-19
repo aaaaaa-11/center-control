@@ -121,7 +121,12 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
-import { queryUserInfo, sendVerifycode, userLogin } from '@/api/userCenter'
+import {
+  queryUserInfo,
+  sendVerifycode,
+  userLogin,
+  type UserInfo,
+} from '@/api/userCenter'
 import { phoneReg, vcodeReg, nameReg, pwReg } from '@/utils/Regexp'
 import { formatPw } from '@/utils/format'
 import { useUserStore } from '@/stores/useUserStore'
@@ -130,6 +135,7 @@ import { useRoute, useRouter } from 'vue-router'
 import config from '@/config'
 import ls from '@/localStore'
 import Vcode from 'vue3-puzzle-vcode'
+import type { AxiosResponse } from 'axios'
 
 const $router = useRouter()
 const $route = useRoute()
@@ -138,15 +144,19 @@ const title = config.title
 const userStore = useUserStore()
 
 // 处理返回的用户信息，returnToken表示需要返回token（登录接口）
-const handleLoginRes = (res: any, returnToken: boolean = false) => {
+const handleLoginRes = (
+  res: AxiosResponse<ResponseData<UserInfo>, any>,
+  returnToken: boolean = false
+) => {
   const { code, data, msg } = res.data
   if (code === 0) {
     const {
       permission,
-      name: user_name,
-      id: user_id,
-      role_id,
-      role_name,
+      userName,
+      userId,
+      roleId,
+      roleName,
+      phone,
       token,
       admin,
     } = data
@@ -170,10 +180,11 @@ const handleLoginRes = (res: any, returnToken: boolean = false) => {
         name: page as string,
       })
       userStore.userInfo = {
-        userName: user_name,
-        userId: user_id,
-        roleId: role_id,
-        roleName: role_name,
+        phone,
+        userName,
+        userId,
+        roleId,
+        roleName,
         admin,
       }
     } catch {

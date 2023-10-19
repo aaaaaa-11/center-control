@@ -38,7 +38,7 @@ export default function useTable(tableType: DATATYPES) {
     total: 0,
   })
 
-  const tableData = ref([])
+  const tableData = ref<any[]>([])
 
   const getData = (params: any) => {
     sendRequest(
@@ -47,7 +47,7 @@ export default function useTable(tableType: DATATYPES) {
         ...page,
       })
     )
-      .then((res: any) => {
+      .then((res) => {
         const { list, total } = res.data
         tableData.value = list
         page.total = total
