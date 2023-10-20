@@ -50,8 +50,10 @@ const coms = [
 ]
 coms.forEach((com) => app.use(com))
 
-const hasShow = await import('./vHasShow')
-
-app.directive('hasShow', hasShow.default)
+// Top-level await is not available in the configured target environment
+// const hasShow = await import('./vHasShow')
+import('./vHasShow').then((hasShow) => {
+  app.directive('hasShow', hasShow.default)
+})
 
 app.mount('#app')
