@@ -1,19 +1,7 @@
 import axios from './index'
-interface RoleListParams {
-  pageNum: number
-  pageSize: number
-  name?: string // 角色名称，模糊查询
-}
-
-export interface RoleItem {
-  roleId: number
-  roleName: string
-  permission: Permission[]
-  admin?: boolean
-}
 
 type RoleListData = {
-  list: RoleItem[]
+  list: Role[]
   total: number
 }
 
@@ -29,7 +17,7 @@ export const queryPermissionList = () => {
 }
 
 // 获取角色列表
-export const queryRoleList = (params: RoleListParams) => {
+export const queryRoleList = (params: PageParamsWithName) => {
   const { pageNum, pageSize, name = '' } = params
   return axios.get<ResponseData<RoleListData>>('/role/query_role_list', {
     params: { pageNum, pageSize, name },

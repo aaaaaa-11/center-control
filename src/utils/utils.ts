@@ -1,25 +1,25 @@
-export type ArrItem = {
-  id: number,
-  parent_id: number,
-  key: number,
-  title: string,
-  children?: ArrItem[],
-  [prosName: string]: any,
+interface TreeItem {
+  id: number
+  parentId: number
+  key: number
+  title: string
+  children?: TreeItem[]
+  [prosName: string]: any
 }
 
-export const arrToTree = (arr: ArrItem[]) => {
+export const arrToTree = <T extends TreeItem>(arr: T[]) => {
   type ObjMapType = {
-    [id: number]: ArrItem
+    [id: number]: TreeItem
   }
-  const tree:ArrItem[] = []
-  const map:ObjMapType = {}
-  arr.forEach(i => {
+  const tree: TreeItem[] = []
+  const map: ObjMapType = {}
+  arr.forEach((i) => {
     map[i.id] = i
   })
-  arr.map(i => {
-    const parent = map[i.parent_id]
+  arr.map((i) => {
+    const parent = map[i.parentId]
     if (parent) {
-      (parent.children || (parent.children = [])).push(i)
+      ;(parent.children || (parent.children = [])).push(i)
     } else {
       tree.push(i)
     }

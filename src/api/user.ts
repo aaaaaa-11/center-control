@@ -1,10 +1,5 @@
 import { formatPw } from '@/utils/format'
 import axios from './index'
-interface UserListParams {
-  pageNum: number
-  pageSize: number
-  name?: string // 用户名称，模糊查询
-}
 export interface UserItem {
   userId: number
   userName: string
@@ -21,7 +16,7 @@ type UserListData = {
 }
 
 // 获取用户列表
-export const queryUserList = (params: UserListParams) => {
+export const queryUserList = (params: PageParamsWithName) => {
   const { pageNum, pageSize, name = '' } = params
   return axios.get<ResponseData<UserListData>>('/user/query_user_list', {
     params: { pageNum, pageSize, name },
