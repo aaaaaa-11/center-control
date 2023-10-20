@@ -13,7 +13,7 @@ export interface NavItem {
   showChildren?: boolean
   children?: Array<NavItem>
 }
-const navData: NavItem[] = JSON.parse(JSON.stringify(config.navList))
+const navData = config.navList as NavItem[]
 navData.map((n) => {
   if (n.children) {
     n.showChildren = false
@@ -21,7 +21,7 @@ navData.map((n) => {
 })
 export const useNavStore = defineStore('nav', () => {
   const manuList = computed((): NavItem[] => {
-    return navData.filter((n) => {
+    return JSON.parse(JSON.stringify(navData)).filter((n: NavItem) => {
       if (n.children?.length) {
         n.children = n.children.filter(
           (c) => !c.auth || userStore.permission.includes(`${c.auth}:view`)
