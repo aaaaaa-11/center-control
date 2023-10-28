@@ -6,8 +6,8 @@ export const tableColumns = [
   },
   {
     title: '区域名称',
-    dataIndex: 'region_name',
-    key: 'region_name',
+    dataIndex: 'regionName',
+    key: 'regionName',
   },
   {
     title: '操作',

@@ -7,10 +7,13 @@ p {
   .fs@{i} {
     font-size: (@i * @mul) + 0px;
   }
-  .fs(@i + 1, @mul)
+  .fs(@i + 1, @mul);
 }
 .fs(12, 1);
 
+.text-left {
+  text-align: left;
+}
 .text-center {
   text-align: center;
 }
@@ -87,7 +90,8 @@ p {
   &-blue {
     background-color: @blue;
     border-color: @blue;
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       background-color: @lightBlue;
       border-color: @lightBlue;
     }
@@ -109,7 +113,7 @@ p {
     background-image: linear-gradient(to right, @blue, transparent);
   }
   &-transparent {
-    background-image:radial-gradient(@blue, transparent)
+    background-image: radial-gradient(@blue, transparent);
   }
 }
 
@@ -148,7 +152,7 @@ p {
     background: @bgcBlue;
   }
   &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .2);
+    background: rgba(0, 0, 0, 0.2);
   }
 }
 

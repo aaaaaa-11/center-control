@@ -8,47 +8,57 @@
         class="blue-tree region-tree"
         :tree-data="regionTree"
         @select="selectTreeItem"
-      >
-      </a-tree>
+      ></a-tree>
     </section>
-    <DeviceDetail
-      ref="deviceDetail" />
+    <DeviceDetail ref="deviceDetail" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRegionStore, type RegionItem } from '@/stores/useRegionStore';
 import DeviceDetail from './DeviceDetail.vue'
-import { ref, watch } from 'vue'
-import { arrToTree, type ArrItem } from '@/utils/utils'
-import type { TreeProps } from 'ant-design-vue';
+import { ref } from 'vue'
+import { arrToTree } from '@/utils/utils'
+import type { TreeProps } from 'ant-design-vue'
+import { useRegionStore } from '@/stores/useRegionStore'
 const regionStore = useRegionStore()
 
 const searchValue = ref<string>('')
 const selectedKeys = ref<string[]>([])
 const checkedKeys = ref<string[]>([])
 
-// watch(searchValue, value => {
-  
-// })
-
-interface RegionTreeItem extends RegionItem {
-  title: string;
-  key: number;
-  name: string;
-  editable?: boolean,
+// 获取区域
+interface RegionTreeItem extends Region {
+  title: string
+  key: number
+  name: string
+  parentId: number
+  editable?: boolean
   children?: RegionTreeItem[]
 }
-const regionTree = arrToTree(regionStore.regionList.map(i => ({
-  ...i,
-  title: i.name,
-  key: i.id
-}))) as RegionTreeItem[]
+const { getAllRegions } = regionStore
+
+const regionTree = ref<RegionTreeItem[]>([])
+const getData = () => {
+  getAllRegions().then(() => {
+    regionTree.value = arrToTree(
+      regionStore.regionList.map((i) => ({
+        ...i,
+        title: i.name,
+        key: i.id,
+      }))
+    ) as RegionTreeItem[]
+    // 自动展开一层
+    // regionTree.value.map((region) => {
+    //   expandedKeys.value.push(region.id)
+    // })
+  })
+}
+getData()
 
 const deviceDetail = ref()
-const selectTreeItem: TreeProps['onSelect'] = (selectedKeys, info) => {
-  deviceDetail.value?.open(selectedKeys[0])
-};
+const selectTreeItem: TreeProps['onSelect'] = (selectedKeys) => {
+  deviceDetail.value?.open(selectedKeys[0] as number)
+}
 </script>
 
 <style lang="less">

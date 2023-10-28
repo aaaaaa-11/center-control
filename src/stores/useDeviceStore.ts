@@ -1,76 +1,82 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createDevice, deleteDevice, queryDeviceList, updateDevice } from '@/api/device'
+import {
+  createDevice,
+  deleteDevice,
+  deleteDevices,
+  queryDeviceList,
+  updateDevice,
+  type deviceListData,
+} from '@/api/device'
 
-export interface DeviceItem {
-  id: number,
-  regionId: number,
-  [prosName: string]: any
-}
+const deviceList = ref<Device[]>([])
 
-type PageParams = {
-  pageNum: number,
-  pageSize: number,
-  region_id?: number
-}
-const deviceList = ref<DeviceItem[]>([])
-export enum DeviceAction {
+export enum ActionTypes {
   c = 'create',
   u = 'update',
-  d = 'delete'
+  d = 'delete',
+  da = 'deleteAll',
 }
 export const useDeviceStore = defineStore('device', () => {
-
   // 根据分页等条件获取设备列表
-  type Res = { total:number, list: DeviceItem[] }
-  const getDeviceList = (params: PageParams):Promise<Res> => {
+  const getDeviceList = (params: DevicePageParams): Promise<deviceListData> => {
     return new Promise((resolve, reject) => {
-      queryDeviceList(params).then((res) => {
-        const { data, code, msg } = res.data
-        if (code === 0) {
-          resolve(data)
-        } else {
-          reject(new Error(msg))
-        }
-      }).catch(e => {
-        console.log(e);
-        reject(e)
-      })
+      queryDeviceList(params)
+        .then((res) => {
+          const { data, code, msg } = res.data
+          if (code === 0) {
+            resolve(data)
+          } else {
+            reject(new Error(msg))
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+          reject(e)
+        })
     })
   }
-  const getAllDevices = () => {
+  // 获取所有设备
+  const getAllDevices = (): Promise<null> => {
     return new Promise((resolve, reject) => {
       deviceList.value = []
       getDeviceList({
         pageNum: 1,
-        pageSize: 999
-      }).then((res: Res) => {
-        const list = res.list
-        deviceList.value = list
-        resolve(null)
-      }).catch(e => {
-        reject(e)
+        pageSize: 999,
       })
+        .then((res) => {
+          const { list, total } = res
+          deviceList.value = list
+          resolve(null)
+        })
+        .catch((e) => {
+          reject(e)
+        })
     })
   }
+
   // 操作设备
   const actions = {
-    [DeviceAction.c]: createDevice,
-    [DeviceAction.u]: updateDevice,
-    [DeviceAction.d]: deleteDevice,
+    [ActionTypes.c]: createDevice,
+    [ActionTypes.u]: updateDevice,
+    [ActionTypes.d]: deleteDevice,
+    [ActionTypes.da]: deleteDevices,
   }
-  const deviceAction = (type: DeviceAction, params: any) => {
+  const deviceAction = (type: ActionTypes, params: any) => {
+    debugger
     return new Promise((resolve, reject) => {
-      actions[type](params).then(res => {
-        const { code, data, msg } = res.data
-        if (code === 0) {
-          resolve(data)
-        } else {
-          reject(new Error(msg))
-        }
-      }).catch(e => {
-        reject(e)
-      })
+      actions[type](params)
+        .then((res) => {
+          const { code, data, msg } = res.data
+          if (code === 0) {
+            resolve(data)
+          } else {
+            reject(new Error(msg))
+          }
+        })
+        .catch((e) => {
+          reject(e)
+        })
     })
   }
 
@@ -78,6 +84,6 @@ export const useDeviceStore = defineStore('device', () => {
     deviceList,
     getDeviceList,
     getAllDevices,
-    deviceAction
+    deviceAction,
   }
 })

@@ -16,25 +16,25 @@
 
 <script setup lang="ts">
 import { ref, reactive, onBeforeUnmount } from 'vue'
-import { message } from 'ant-design-vue';
-import { useMapStore } from '@/stores/useMapStore';
-const mapStore = useMapStore()
+import { message } from 'ant-design-vue'
+import { useMapStore } from '@/stores/useMapStore'
+const { mapAction, switchOpenPos } = useMapStore()
 
 type nl = number | null
 type Pos = {
-  lng: nl,
-  lat: nl,
-  alt: nl,
+  lng: nl
+  lat: nl
+  alt: nl
   id: number
 }
 type Position = {
-  lng: number,
-  lat: number,
-  alt: number,
+  lng: number
+  lat: number
+  alt: number
   id: number
 }
 const emit = defineEmits<{
-  (e:'submit', params:Position):void
+  (e: 'submit', params: Position): void
 }>()
 
 const visible = ref(false)
@@ -43,27 +43,27 @@ const pos = reactive<Pos>({
   lng: null,
   lat: null,
   alt: null,
-  id: 0
+  id: 0,
 })
 
-const setPos = (position:Pos) => {
-  const { lng, lat, alt} = position
+const setPos = (position: Pos) => {
+  const { lng, lat, alt } = position
   pos.lng = lng
   pos.lat = lat
   pos.alt = alt
-  mapStore.mapAction('createMarkerByClickMap', {
+  mapAction('createMarkerByClickMap', {
     id: new Date().getTime(),
-    ...{ lng, lat, alt}
+    ...{ lng, lat, alt },
   })
-  console.log(pos);
+  console.log(pos)
 }
-const open = (item:Pos) => {
-  mapStore.switchOpenPos(true, setPos)
+const open = (item: Pos) => {
+  switchOpenPos(true, setPos)
   visible.value = true
   pos.id = 0
   resetForm()
   Object.assign(pos, item)
-  console.log(pos);
+  console.log(pos)
 }
 const submit = () => {
   if (pos.lng && pos.lat && pos.alt) {
@@ -78,8 +78,8 @@ const resetForm = () => {
   pos.alt = null
 }
 const close = () => {
-  mapStore.switchOpenPos(false, setPos)
-  mapStore.mapAction('removePreCreateMarker')
+  switchOpenPos(false, setPos)
+  mapAction('removePreCreateMarker')
   visible.value = false
 }
 
@@ -88,7 +88,7 @@ onBeforeUnmount(() => {
 })
 defineExpose({
   open,
-  close
+  close,
 })
 </script>
 
@@ -98,7 +98,7 @@ defineExpose({
   position: absolute;
   left: 520px;
   top: 0;
-  width: 220px;
+  width: 250px;
   height: 200px;
   z-index: 20;
   padding: 20px 10px;
